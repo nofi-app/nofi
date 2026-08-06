@@ -675,3 +675,106 @@ body {
   height: 100%;
   font-size: 0.9rem;
 }
+
+/* File attachments */
+.file-attachments {
+  padding: 0.5rem 0.9rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-muted);
+}
+
+.file-attach-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.hidden-file-input {
+  display: none;
+}
+
+.file-chip-list {
+  list-style: none;
+  margin: 0.4rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.file-chip {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+}
+
+.file-chip-name {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.85rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.file-chip-size {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+}
+
+.file-chip-btn {
+  padding: 0.2rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text);
+  font-size: 0.75rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.file-chip-btn:hover {
+  background: var(--border);
+}
+
+.file-chip-btn.danger:hover {
+  background: var(--error);
+  border-color: var(--error);
+  color: #fff;
+}
+
+.file-preview {
+  margin-top: 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  overflow: hidden;
+}
+
+.file-preview-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.3rem 0.6rem;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.85rem;
+}
+
+.file-preview-frame {
+  width: 100%;
+  height: 420px;
+  border: none;
+  display: block;
+}
+
+.editor-loading {
+  flex: 1;
+  display: grid;
+  place-items: center;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}

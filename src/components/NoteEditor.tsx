@@ -3,6 +3,7 @@ import type { FolderItem, NoteEditorType, NoteItem, TagItem } from '../lib/types
 import { editorLabel } from '../lib/notes'
 import { folderPath } from '../lib/folders'
 import { TextEditor } from './editors/TextEditor'
+import { FileAttachments } from './FileAttachments'
 
 const MarkdownEditor = lazy(() =>
   import('./editors/MarkdownEditor').then((m) => ({
@@ -257,6 +258,8 @@ export function NoteEditor({
           {tagError && <span className="tag-error">{tagError}</span>}
         </div>
       </div>
+
+      {!draft.trashed && <FileAttachments noteId={draft.id} />}
 
       {renderEditor()}
     </div>

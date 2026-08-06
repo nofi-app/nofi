@@ -145,3 +145,23 @@ export async function unwrapItemKey(
     'decrypt',
   ])
 }
+
+export async function encryptFileBytes(
+  key: CryptoKey,
+  bytes: Uint8Array,
+): Promise<Uint8Array> {
+  const { iv, ciphertext } = await encryptBytes(key, bytes)
+  const out = new Uint8Array(iv.length + ciphertext.length)
+  out.set(iv, 0)
+  out.set(ciphertext, iv.length)
+  return out
+}
+
+export async function decryptFileBytes(
+  key: CryptoKey,
+  data: Uint8Array,
+): Promise<Uint8Array> {
+  const iv = data.slice(0, 12)
+  const ciphertext = data.slice(12)
+  return decryptBytes(key, { iv, ciphertext })
+}

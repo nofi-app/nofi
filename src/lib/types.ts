@@ -40,7 +40,7 @@ export interface FileItem extends BaseItem {
   size: number
   noteId: string
   storagePath: string
-  iv: string
+  key: string
 }
 
 export type Item = NoteItem | TagItem | FolderItem | FileItem
