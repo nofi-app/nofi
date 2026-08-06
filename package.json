@@ -12,6 +12,12 @@
   "dependencies": {
     "@noble/hashes": "^2.3.0",
     "@supabase/supabase-js": "^2.112.1",
+    "@tiptap/pm": "^3.29.2",
+    "@tiptap/react": "^3.29.2",
+    "@tiptap/starter-kit": "^3.29.2",
+    "@uiw/react-codemirror": "^4.25.11",
+    "dompurify": "^3.4.13",
+    "marked": "^18.0.9",
     "react": "^19.2.8",
     "react-dom": "^19.2.8"
   },

@@ -8,8 +8,11 @@ export interface BaseItem {
   deleted: boolean
 }
 
+export type NoteEditorType = 'plain' | 'markdown' | 'rich' | 'code' | 'checklist'
+
 export interface NoteItem extends BaseItem {
   type: 'note'
+  editor: NoteEditorType
   title: string
   text: string
   tags: string[]

@@ -223,3 +223,314 @@ body {
 .app-placeholder {
   color: var(--text-muted);
 }
+
+/* Three-pane layout */
+.app-body {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 200px minmax(220px, 280px) 1fr;
+  min-height: 0;
+}
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding: 0.75rem;
+  border-right: 1px solid var(--border);
+  background: var(--bg-muted);
+}
+
+.sidebar-search {
+  padding: 0.45rem 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text);
+  margin-bottom: 0.4rem;
+}
+
+.sidebar-btn {
+  padding: 0.45rem 0.6rem;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.sidebar-btn:hover {
+  background: var(--border);
+}
+
+.sidebar-btn.primary {
+  background: var(--accent);
+  color: #fff;
+}
+
+.sidebar-btn.primary:hover {
+  background: var(--accent-hover);
+}
+
+.sidebar-spacer {
+  flex: 1;
+}
+
+.note-list {
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--border);
+  overflow-y: auto;
+}
+
+.note-list-empty {
+  padding: 1rem;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.note-list-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 0.6rem 0.8rem;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  background: transparent;
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+}
+
+.note-list-item:hover {
+  background: var(--bg-muted);
+}
+
+.note-list-item.selected {
+  background: var(--accent);
+  color: #fff;
+}
+
+.note-list-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.note-list-snippet {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.note-list-item.selected .note-list-snippet {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.pin-marker {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-right: 6px;
+  border-radius: 50%;
+  background: var(--accent-hover);
+  vertical-align: middle;
+}
+
+.note-list-item.selected .pin-marker {
+  background: #fff;
+}
+
+.editor-pane {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.editor-empty {
+  flex: 1;
+  display: grid;
+  place-items: center;
+  color: var(--text-muted);
+}
+
+.note-editor {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.note-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.5rem 0.9rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.note-title-input {
+  flex: 1;
+  min-width: 0;
+  padding: 0.35rem 0.4rem;
+  border: none;
+  background: transparent;
+  color: var(--text);
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+.note-title-input:focus {
+  outline: none;
+}
+
+.note-toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.editor-select-wrap select {
+  padding: 0.3rem 0.45rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 0.8rem;
+}
+
+.toolbar-btn {
+  padding: 0.35rem 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text);
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.toolbar-btn:hover {
+  background: var(--border);
+}
+
+.toolbar-btn.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.toolbar-btn.danger:hover {
+  background: var(--error);
+  border-color: var(--error);
+  color: #fff;
+}
+
+/* Editors */
+.note-editor-text {
+  flex: 1;
+  width: 100%;
+  padding: 0.9rem 1.1rem;
+  border: none;
+  background: transparent;
+  color: var(--text);
+  font-size: 0.95rem;
+  line-height: 1.6;
+  resize: none;
+}
+
+.note-editor-text.monospace {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.note-editor-text:focus {
+  outline: none;
+}
+
+.note-md-wrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  min-height: 0;
+}
+
+.note-md-preview {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0.9rem 1.1rem;
+  line-height: 1.6;
+}
+
+.note-md-preview h1,
+.note-md-preview h2,
+.note-md-preview h3 {
+  margin: 0.6rem 0 0.3rem;
+}
+
+.note-md-preview pre {
+  background: var(--bg-muted);
+  padding: 0.6rem 0.8rem;
+  border-radius: 6px;
+  overflow-x: auto;
+}
+
+.note-md-preview code {
+  background: var(--bg-muted);
+  padding: 0.1rem 0.3rem;
+  border-radius: 4px;
+}
+
+.note-md-preview ul,
+.note-md-preview ol {
+  padding-left: 1.4rem;
+}
+
+.editor-toggle {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.6rem;
+  padding: 0.3rem 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg-muted);
+  color: var(--text);
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.editor-toggle:hover {
+  background: var(--border);
+}
+
+.note-editor-rich {
+  flex: 1;
+  padding: 0.9rem 1.1rem;
+  overflow-y: auto;
+  outline: none;
+}
+
+.note-editor-rich .ProseMirror {
+  min-height: 100%;
+}
+
+.note-editor-rich p {
+  margin: 0 0 0.5rem;
+}
+
+.note-code-wrap {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.note-code-wrap .cm-editor {
+  height: 100%;
+  font-size: 0.9rem;
+}
