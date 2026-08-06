@@ -13,7 +13,7 @@ create table if not exists public.vault (
 -- encrypted_content is the encrypted JSON blob for the item type.
 create table if not exists public.items (
   id uuid primary key,
-  user_id uuid not null references auth.users (id) on delete cascade,
+  user_id uuid not null default auth.uid() references auth.users (id) on delete cascade,
   content_type text not null,
   encrypted_content text not null,
   deleted boolean not null default false,

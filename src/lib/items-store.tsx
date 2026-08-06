@@ -49,14 +49,14 @@ export function ItemsProvider({ children }: { children: ReactNode }) {
   }, [status, masterKey])
 
   async function addItem(item: Item) {
-    if (!masterKey) return
-    await pushItem(masterKey, item)
+    if (!user || !masterKey) return
+    await pushItem(user.id, masterKey, item)
     setItems((prev) => [...prev.filter((i) => i.id !== item.id), item])
   }
 
   async function updateItem(item: Item) {
-    if (!masterKey) return
-    await pushItem(masterKey, item)
+    if (!user || !masterKey) return
+    await pushItem(user.id, masterKey, item)
     setItems((prev) => [...prev.filter((i) => i.id !== item.id), item])
   }
 

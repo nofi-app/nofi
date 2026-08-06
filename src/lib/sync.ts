@@ -56,12 +56,14 @@ export async function pullUpdates(
 }
 
 export async function pushItem(
+  userId: string,
   masterKey: CryptoKey,
   item: Item,
 ): Promise<void> {
   const encrypted = await encryptItem(masterKey, item)
   const row: StoredRow = {
     id: item.id,
+    user_id: userId,
     content_type: item.type,
     encrypted_content: JSON.stringify(encrypted),
     deleted: item.deleted,

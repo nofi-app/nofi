@@ -14,6 +14,7 @@ export interface StoredPayload {
 
 export interface StoredRow {
   id: string
+  user_id: string
   content_type: string
   encrypted_content: string
   deleted: boolean
