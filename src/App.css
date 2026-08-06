@@ -137,6 +137,26 @@ body {
   font-size: 0.85rem;
 }
 
+.auth-warning,
+.auth-note {
+  margin: 0 0 1rem;
+  padding: 0.6rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+}
+
+.auth-warning {
+  background: rgba(198, 40, 40, 0.1);
+  border: 1px solid rgba(198, 40, 40, 0.3);
+  color: var(--text);
+}
+
+.auth-note {
+  background: rgba(47, 111, 237, 0.1);
+  border: 1px solid rgba(47, 111, 237, 0.3);
+  color: var(--text);
+}
+
 .auth-toggle {
   display: block;
   margin: 1rem auto 0;
