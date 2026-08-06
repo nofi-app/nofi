@@ -4,6 +4,7 @@ import { editorLabel } from '../lib/notes'
 import { folderPath } from '../lib/folders'
 import { TextEditor } from './editors/TextEditor'
 import { FileAttachments } from './FileAttachments'
+import { RevisionHistory } from './RevisionHistory'
 
 const MarkdownEditor = lazy(() =>
   import('./editors/MarkdownEditor').then((m) => ({
@@ -58,6 +59,7 @@ export function NoteEditor({
   const [dirty, setDirty] = useState(false)
   const [tagInput, setTagInput] = useState('')
   const [tagError, setTagError] = useState<string | null>(null)
+  const [showHistory, setShowHistory] = useState(false)
 
   useEffect(() => {
     setDraft(note)
@@ -163,6 +165,16 @@ export function NoteEditor({
             <button
               type="button"
               className="toolbar-btn"
+              onClick={() => setShowHistory(true)}
+              title="Version history"
+            >
+              History
+            </button>
+          )}
+          {!draft.trashed && (
+            <button
+              type="button"
+              className="toolbar-btn"
               onClick={() => onToggleArchive(draft)}
               title="Archive"
             >
@@ -260,6 +272,16 @@ export function NoteEditor({
       </div>
 
       {!draft.trashed && <FileAttachments noteId={draft.id} />}
+
+      {showHistory && (
+        <RevisionHistory
+          noteId={draft.id}
+          onClose={() => setShowHistory(false)}
+          onRestore={(title, text, editor) => {
+            edit({ title, text, editor })
+          }}
+        />
+      )}
 
       {renderEditor()}
     </div>
