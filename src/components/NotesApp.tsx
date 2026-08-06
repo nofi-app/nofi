@@ -9,6 +9,7 @@ import { exportJson, exportMarkdown, parseImport } from '../lib/export'
 import { applyTheme, getTheme, setTheme, type Theme } from '../lib/theme'
 import type { Filter, NoteItem } from '../lib/types'
 import {
+  DownloadIcon,
   FolderIcon,
   LockIcon,
   MoonIcon,
@@ -19,6 +20,7 @@ import {
   SunIcon,
   TagIcon,
   TrashIcon,
+  UploadIcon,
 } from './icons'
 import { NoteList, type SortMode } from './NoteList'
 import { NoteEditor } from './NoteEditor'
@@ -341,7 +343,7 @@ export function NotesApp() {
               className="sidebar-btn"
               onClick={() => exportJson(items)}
             >
-              <DownloadOutlined />
+              <DownloadIcon size={15} />
               Export JSON
             </button>
             <button
@@ -349,7 +351,7 @@ export function NotesApp() {
               className="sidebar-btn"
               onClick={() => exportMarkdown(items)}
             >
-              <DownloadOutlined />
+              <DownloadIcon size={15} />
               Export Markdown
             </button>
             <button
@@ -357,7 +359,7 @@ export function NotesApp() {
               className="sidebar-btn"
               onClick={() => importRef.current?.click()}
             >
-              <UploadOutlined />
+              <UploadIcon size={15} />
               Import
             </button>
             <input
@@ -443,26 +445,6 @@ export function NotesApp() {
 
       {showHelp && <ShortcutsHelp onClose={() => setShowHelp(false)} />}
     </div>
-  )
-}
-
-function DownloadOutlined() {
-  return (
-    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-      <path d="m7 10 5 5 5-5" />
-      <path d="M12 15V3" />
-    </svg>
-  )
-}
-
-function UploadOutlined() {
-  return (
-    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-      <path d="m17 8-5-5-5 5" />
-      <path d="M12 3v12" />
-    </svg>
   )
 }
 
