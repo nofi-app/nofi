@@ -20,6 +20,7 @@ export interface NoteItem extends BaseItem {
   pinned: boolean
   archived: boolean
   trashed: boolean
+  locked: boolean
 }
 
 export interface TagItem extends BaseItem {

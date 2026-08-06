@@ -12,7 +12,13 @@ function SignedIn() {
   const { status } = useVault()
 
   if (status === 'loading') return <div className="boot">Loading…</div>
-  if (status === 'nosetup' || status === 'locked') return <VaultScreen />
+  if (
+    status === 'nosetup' ||
+    status === 'locked' ||
+    status === 'passcode-locked'
+  ) {
+    return <VaultScreen />
+  }
   return <NotesApp />
 }
 

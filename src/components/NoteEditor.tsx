@@ -1,7 +1,18 @@
-import { Suspense, lazy, useEffect, useState } from 'react'
+import { Suspense, lazy, useCallback, useEffect, useState } from 'react'
 import type { FolderItem, NoteEditorType, NoteItem, TagItem } from '../lib/types'
 import { editorLabel } from '../lib/notes'
 import { folderPath } from '../lib/folders'
+import { useVault } from '../lib/vault-context'
+import {
+  AlertIcon,
+  ArchiveIcon,
+  CheckIcon,
+  HistoryIcon,
+  LockIcon,
+  PinIcon,
+  RestoreIcon,
+  TrashIcon,
+} from './icons'
 import { TextEditor } from './editors/TextEditor'
 import { FileAttachments } from './FileAttachments'
 import { RevisionHistory } from './RevisionHistory'
@@ -30,11 +41,13 @@ const EDITOR_TYPES: NoteEditorType[] = [
   'checklist',
 ]
 
+type SaveState = 'idle' | 'saving' | 'saved' | 'error'
+
 interface NoteEditorProps {
   note: NoteItem
   folders: FolderItem[]
   tags: TagItem[]
-  onUpdate: (note: NoteItem) => void
+  onUpdate: (note: NoteItem) => Promise<void>
   onTrash: (id: string) => void
   onTogglePin: (note: NoteItem) => void
   onToggleArchive: (note: NoteItem) => void
@@ -55,25 +68,43 @@ export function NoteEditor({
   onDeleteForever,
   onAddTag,
 }: NoteEditorProps) {
+  const { unlock } = useVault()
   const [draft, setDraft] = useState<NoteItem>(note)
   const [dirty, setDirty] = useState(false)
+  const [saveState, setSaveState] = useState<SaveState>('idle')
   const [tagInput, setTagInput] = useState('')
   const [tagError, setTagError] = useState<string | null>(null)
   const [showHistory, setShowHistory] = useState(false)
+  const [unlockPass, setUnlockPass] = useState('')
+  const [unlockError, setUnlockError] = useState<string | null>(null)
+  const [unlockBusy, setUnlockBusy] = useState(false)
 
   useEffect(() => {
     setDraft(note)
     setDirty(false)
+    setSaveState('idle')
   }, [note.id]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const save = useCallback(
+    async (current: NoteItem) => {
+      setSaveState('saving')
+      try {
+        await onUpdate({ ...current, updatedAt: Date.now() })
+        setSaveState('saved')
+        setDirty(false)
+      } catch (err) {
+        console.error('Save failed:', err)
+        setSaveState('error')
+      }
+    },
+    [onUpdate],
+  )
 
   useEffect(() => {
     if (!dirty) return
-    const timer = setTimeout(() => {
-      onUpdate({ ...draft, updatedAt: Date.now() })
-      setDirty(false)
-    }, 700)
+    const timer = setTimeout(() => void save(draft), 700)
     return () => clearTimeout(timer)
-  }, [draft, dirty, onUpdate])
+  }, [draft, dirty, save])
 
   function edit(patch: Partial<NoteItem>) {
     setDirty(true)
@@ -84,7 +115,9 @@ export function NoteEditor({
     const name = tagInput.trim()
     setTagError(null)
     if (!name) return
-    const existing = tags.find((t) => t.name.toLowerCase() === name.toLowerCase())
+    const existing = tags.find(
+      (t) => t.name.toLowerCase() === name.toLowerCase(),
+    )
     const id = existing ? existing.id : await onAddTag(name)
     if (!id) return
     if (!draft.tags.includes(id)) edit({ tags: [...draft.tags, id] })
@@ -93,6 +126,20 @@ export function NoteEditor({
 
   function removeTag(id: string) {
     edit({ tags: draft.tags.filter((t) => t !== id) })
+  }
+
+  async function handleUnlockNote(e: React.FormEvent) {
+    e.preventDefault()
+    setUnlockError(null)
+    setUnlockBusy(true)
+    const result = await unlock(unlockPass)
+    setUnlockBusy(false)
+    if (result.error) {
+      setUnlockError(result.error)
+      return
+    }
+    edit({ locked: false })
+    setUnlockPass('')
   }
 
   function renderEditor() {
@@ -129,6 +176,27 @@ export function NoteEditor({
     )
   }
 
+  function renderSaveIndicator() {
+    if (saveState === 'saving') {
+      return <span className="save-indicator saving">Saving…</span>
+    }
+    if (saveState === 'saved') {
+      return (
+        <span className="save-indicator saved">
+          Saved <CheckIcon size={12} />
+        </span>
+      )
+    }
+    if (saveState === 'error') {
+      return (
+        <span className="save-indicator error">
+          Failed <AlertIcon size={12} />
+        </span>
+      )
+    }
+    return <span className="save-indicator" />
+  }
+
   return (
     <div className="note-editor">
       <div className="note-toolbar">
@@ -139,6 +207,7 @@ export function NoteEditor({
           placeholder="Note title"
         />
         <div className="note-toolbar-actions">
+          {renderSaveIndicator()}
           <label className="editor-select-wrap">
             <select
               value={draft.editor}
@@ -157,10 +226,22 @@ export function NoteEditor({
             type="button"
             className={`toolbar-btn${draft.pinned ? ' active' : ''}`}
             onClick={() => onTogglePin(draft)}
-            title="Pin"
+            title="Pin note"
           >
-            Pin
+            <PinIcon size={15} />
           </button>
+          {!draft.trashed && (
+            <button
+              type="button"
+              className={`toolbar-btn${draft.locked ? ' active' : ''}`}
+              onClick={() => {
+                if (!draft.locked) edit({ locked: true })
+              }}
+              title={draft.locked ? 'Note locked' : 'Lock note'}
+            >
+              <LockIcon size={15} />
+            </button>
+          )}
           {!draft.trashed && (
             <button
               type="button"
@@ -168,7 +249,7 @@ export function NoteEditor({
               onClick={() => setShowHistory(true)}
               title="Version history"
             >
-              History
+              <HistoryIcon size={15} />
             </button>
           )}
           {!draft.trashed && (
@@ -176,9 +257,9 @@ export function NoteEditor({
               type="button"
               className="toolbar-btn"
               onClick={() => onToggleArchive(draft)}
-              title="Archive"
+              title={draft.archived ? 'Unarchive' : 'Archive'}
             >
-              {draft.archived ? 'Unarchive' : 'Archive'}
+              <ArchiveIcon size={15} />
             </button>
           )}
           {!draft.trashed ? (
@@ -188,7 +269,7 @@ export function NoteEditor({
               onClick={() => onTrash(draft.id)}
               title="Move to trash"
             >
-              Delete
+              <TrashIcon size={15} />
             </button>
           ) : (
             <>
@@ -198,7 +279,7 @@ export function NoteEditor({
                 onClick={() => onRestore(draft)}
                 title="Restore from trash"
               >
-                Restore
+                <RestoreIcon size={15} />
               </button>
               <button
                 type="button"
@@ -206,7 +287,7 @@ export function NoteEditor({
                 onClick={() => onDeleteForever(draft.id)}
                 title="Permanently delete"
               >
-                Delete forever
+                <TrashIcon size={15} />
               </button>
             </>
           )}
@@ -218,9 +299,7 @@ export function NoteEditor({
           <span className="meta-label">Folder</span>
           <select
             value={draft.folderId ?? ''}
-            onChange={(e) =>
-              edit({ folderId: e.target.value || null })
-            }
+            onChange={(e) => edit({ folderId: e.target.value || null })}
           >
             <option value="">No folder</option>
             {folders.map((f) => (
@@ -271,7 +350,7 @@ export function NoteEditor({
         </div>
       </div>
 
-      {!draft.trashed && <FileAttachments noteId={draft.id} />}
+      {!draft.trashed && !draft.locked && <FileAttachments noteId={draft.id} />}
 
       {showHistory && (
         <RevisionHistory
@@ -283,7 +362,30 @@ export function NoteEditor({
         />
       )}
 
-      {renderEditor()}
+      {draft.locked ? (
+        <div className="note-lock-overlay">
+          <div className="note-lock-card">
+            <LockIcon size={26} />
+            <h3>Note locked</h3>
+            <p>Enter your vault passphrase to view this note.</p>
+            <form onSubmit={handleUnlockNote}>
+              <input
+                type="password"
+                value={unlockPass}
+                onChange={(e) => setUnlockPass(e.target.value)}
+                autoFocus
+                placeholder="Passphrase"
+              />
+              {unlockError && <p className="auth-error">{unlockError}</p>}
+              <button type="submit" className="btn primary" disabled={unlockBusy}>
+                {unlockBusy ? 'Checking…' : 'Unlock note'}
+              </button>
+            </form>
+          </div>
+        </div>
+      ) : (
+        renderEditor()
+      )}
     </div>
   )
 }

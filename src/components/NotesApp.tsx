@@ -8,8 +8,21 @@ import { saveRevision } from '../lib/revisions'
 import { exportJson, exportMarkdown, parseImport } from '../lib/export'
 import { applyTheme, getTheme, setTheme, type Theme } from '../lib/theme'
 import type { Filter, NoteItem } from '../lib/types'
-import { NoteList } from './NoteList'
+import {
+  FolderIcon,
+  LockIcon,
+  MoonIcon,
+  NotesIcon,
+  PlusIcon,
+  SearchIcon,
+  SparkIcon,
+  SunIcon,
+  TagIcon,
+  TrashIcon,
+} from './icons'
+import { NoteList, type SortMode } from './NoteList'
 import { NoteEditor } from './NoteEditor'
+import { ShortcutsHelp } from './ShortcutsHelp'
 
 interface FolderNode {
   folder: { id: string; name: string }
@@ -22,9 +35,11 @@ export function NotesApp() {
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [search, setSearch] = useState('')
   const [filter, setFilter] = useState<Filter>({ kind: 'all' })
+  const [sort, setSort] = useState<SortMode>('updated')
   const [error, setError] = useState<string | null>(null)
   const [newFolderParent, setNewFolderParent] = useState<string | null>(null)
   const [theme, setThemeState] = useState<Theme>(() => getTheme())
+  const [showHelp, setShowHelp] = useState(false)
   const searchRef = useRef<HTMLInputElement>(null)
   const importRef = useRef<HTMLInputElement>(null)
   const lastRevisionAt = useRef(new Map<string, number>())
@@ -50,6 +65,19 @@ export function NotesApp() {
     return roots
   }, [folders])
 
+  const listTitle = useMemo(() => {
+    switch (filter.kind) {
+      case 'trash':
+        return 'Trash'
+      case 'tag':
+        return '#' + (tags.find((t) => t.id === filter.id)?.name ?? '')
+      case 'folder':
+        return folders.find((f) => f.id === filter.id)?.name ?? 'Folder'
+      default:
+        return search ? `Results for “${search}”` : 'All notes'
+    }
+  }, [filter, tags, folders, search])
+
   const selected = items.find((i) => i.id === selectedId)
   const activeNote = selected && isNote(selected) ? selected : null
 
@@ -70,7 +98,7 @@ export function NotesApp() {
     })
   }
 
-  function handleUpdate(note: NoteItem) {
+  async function handleUpdate(note: NoteItem): Promise<void> {
     if (masterKey) {
       const last = lastRevisionAt.current.get(note.id) ?? 0
       if (Date.now() - last > 5 * 60 * 1000) {
@@ -80,7 +108,7 @@ export function NotesApp() {
         )
       }
     }
-    run(() => updateItem(note))
+    await updateItem(note)
   }
 
   function handleTrash(id: string) {
@@ -96,7 +124,11 @@ export function NotesApp() {
 
   function toggleArchive(note: NoteItem) {
     run(async () => {
-      await updateItem({ ...note, archived: !note.archived, updatedAt: Date.now() })
+      await updateItem({
+        ...note,
+        archived: !note.archived,
+        updatedAt: Date.now(),
+      })
       setSelectedId(null)
     })
   }
@@ -161,9 +193,14 @@ export function NotesApp() {
       } else if (mod && !e.shiftKey && e.key.toLowerCase() === 'f') {
         e.preventDefault()
         searchRef.current?.focus()
+      } else if (mod && !e.shiftKey && e.key.toLowerCase() === 'e') {
+        e.preventDefault()
+        cycleTheme()
       } else if (mod && e.shiftKey && e.key.toLowerCase() === 'l') {
         e.preventDefault()
         lock()
+      } else if (e.key === '?') {
+        setShowHelp(true)
       } else if (e.key === 'Escape') {
         setSelectedId(null)
       }
@@ -174,6 +211,9 @@ export function NotesApp() {
 
   function renderFolder(node: FolderNode, depth: number) {
     const selectedHere = filter.kind === 'folder' && filter.id === node.folder.id
+    const count = notes.filter(
+      (n) => n.folderId === node.folder.id && !n.trashed && !n.archived,
+    ).length
     return (
       <div key={node.folder.id}>
         <button
@@ -182,7 +222,9 @@ export function NotesApp() {
           style={{ paddingLeft: `${0.6 + depth * 0.9}rem` }}
           onClick={() => setFilter({ kind: 'folder', id: node.folder.id })}
         >
+          <FolderIcon size={15} />
           {node.folder.name}
+          {count > 0 && <span className="count">{count}</span>}
         </button>
         {node.children.map((c) => renderFolder(c, depth + 1))}
       </div>
@@ -192,13 +234,31 @@ export function NotesApp() {
   return (
     <div className="app-shell">
       <header className="app-header">
-        <span className="app-brand">Nofi</span>
+        <span className="app-brand">
+          <span className="brand-mark-sm">
+            <SparkIcon size={14} />
+          </span>
+          Nofi
+        </span>
         <div className="app-header-right">
-          <span className="app-email">{notes.length} notes</span>
-          <button type="button" className="signout-btn" onClick={cycleTheme}>
-            Theme: {theme}
+          <button
+            type="button"
+            className="icon-btn"
+            onClick={cycleTheme}
+            title={`Theme: ${theme}`}
+          >
+            {theme === 'dark' ? <SunIcon size={16} /> : <MoonIcon size={16} />}
           </button>
-          <button type="button" className="signout-btn" onClick={lock}>
+          <button
+            type="button"
+            className="icon-btn"
+            onClick={() => setShowHelp(true)}
+            title="Keyboard shortcuts"
+          >
+            ?
+          </button>
+          <button type="button" className="btn" onClick={lock}>
+            <LockIcon size={14} />
             Lock
           </button>
         </div>
@@ -207,19 +267,26 @@ export function NotesApp() {
       <div className="app-body">
         {error && <div className="error-banner">{error}</div>}
         <aside className="sidebar">
-          <input
-            ref={searchRef}
-            className="sidebar-search"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search notes…"
-          />
+          <div className="sidebar-search">
+            <SearchIcon className="search-icon" size={14} />
+            <input
+              ref={searchRef}
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search notes…"
+            />
+          </div>
+
           <button
             type="button"
             className={`sidebar-btn${filter.kind === 'all' ? ' active' : ''}`}
             onClick={() => setFilter({ kind: 'all' })}
           >
+            <NotesIcon size={15} />
             All notes
+            <span className="count">
+              {notes.filter((n) => !n.trashed && !n.archived).length}
+            </span>
           </button>
 
           {tags.length > 0 && (
@@ -232,7 +299,13 @@ export function NotesApp() {
                   className={`sidebar-btn${filter.kind === 'tag' && filter.id === t.id ? ' active' : ''}`}
                   onClick={() => setFilter({ kind: 'tag', id: t.id })}
                 >
-                  # {t.name}
+                  <TagIcon size={15} />
+                  {t.name}
+                  <span className="count">
+                    {notes.filter(
+                      (n) => n.tags.includes(t.id) && !n.trashed && !n.archived,
+                    ).length}
+                  </span>
                 </button>
               ))}
             </>
@@ -262,46 +335,53 @@ export function NotesApp() {
 
           <div className="sidebar-spacer" />
 
-          <button
-            type="button"
-            className="sidebar-btn"
-            onClick={() => {
-              exportJson(items)
-            }}
-          >
-            Export JSON
-          </button>
-          <button
-            type="button"
-            className="sidebar-btn"
-            onClick={() => exportMarkdown(items)}
-          >
-            Export Markdown
-          </button>
-          <button
-            type="button"
-            className="sidebar-btn"
-            onClick={() => importRef.current?.click()}
-          >
-            Import
-          </button>
-          <input
-            ref={importRef}
-            type="file"
-            accept=".json,application/json"
-            className="hidden-file-input"
-            onChange={(e) => {
-              void handleImport(e.target.files?.[0])
-              e.target.value = ''
-            }}
-          />
+          <div className="sidebar-footer">
+            <button
+              type="button"
+              className="sidebar-btn"
+              onClick={() => exportJson(items)}
+            >
+              <DownloadOutlined />
+              Export JSON
+            </button>
+            <button
+              type="button"
+              className="sidebar-btn"
+              onClick={() => exportMarkdown(items)}
+            >
+              <DownloadOutlined />
+              Export Markdown
+            </button>
+            <button
+              type="button"
+              className="sidebar-btn"
+              onClick={() => importRef.current?.click()}
+            >
+              <UploadOutlined />
+              Import
+            </button>
+            <input
+              ref={importRef}
+              type="file"
+              accept=".json,application/json"
+              className="hidden-file-input"
+              onChange={(e) => {
+                void handleImport(e.target.files?.[0])
+                e.target.value = ''
+              }}
+            />
+          </div>
 
           <button
             type="button"
             className={`sidebar-btn${filter.kind === 'trash' ? ' active' : ''}`}
             onClick={() => setFilter({ kind: 'trash' })}
           >
+            <TrashIcon size={15} />
             Trash
+            {notes.some((n) => n.trashed) && (
+              <span className="count">{notes.filter((n) => n.trashed).length}</span>
+            )}
           </button>
           {filter.kind === 'trash' && notes.some((n) => n.trashed) && (
             <button type="button" className="sidebar-btn" onClick={emptyTrash}>
@@ -309,13 +389,17 @@ export function NotesApp() {
             </button>
           )}
           <button type="button" className="sidebar-btn primary" onClick={newNote}>
-            + New note
+            <PlusIcon size={15} />
+            New note
           </button>
         </aside>
 
         <NoteList
           filter={filter}
+          title={listTitle}
           search={search}
+          sort={sort}
+          onSort={setSort}
           selectedId={selectedId}
           onSelect={setSelectedId}
         />
@@ -337,14 +421,48 @@ export function NotesApp() {
             />
           ) : (
             <div className="editor-empty">
-              {filter.kind === 'trash'
-                ? 'Trash is empty'
-                : 'Select a note or create a new one'}
+              <div className="empty-state">
+                <NotesIcon className="empty-icon" size={40} />
+                <h3>{filter.kind === 'trash' ? 'Trash is empty' : 'No note selected'}</h3>
+                <p>
+                  {filter.kind === 'trash'
+                    ? 'Deleted notes appear here and can be restored.'
+                    : 'Pick a note from the list, or create a new one with the button on the left.'}
+                </p>
+                {filter.kind !== 'trash' && (
+                  <button type="button" className="btn primary" onClick={newNote}>
+                    <PlusIcon size={14} />
+                    New note
+                  </button>
+                )}
+              </div>
             </div>
           )}
         </section>
       </div>
+
+      {showHelp && <ShortcutsHelp onClose={() => setShowHelp(false)} />}
     </div>
+  )
+}
+
+function DownloadOutlined() {
+  return (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+      <path d="m7 10 5 5 5-5" />
+      <path d="M12 15V3" />
+    </svg>
+  )
+}
+
+function UploadOutlined() {
+  return (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+      <path d="m17 8-5-5-5 5" />
+      <path d="M12 3v12" />
+    </svg>
   )
 }
 

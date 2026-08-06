@@ -43,7 +43,7 @@ export function deriveVaultKey(
     p: 4,
     dkLen: 32,
   })
-  return crypto.subtle.importKey('raw', bytes, 'AES-GCM', false, [
+  return crypto.subtle.importKey('raw', bytes, 'AES-GCM', true, [
     'encrypt',
     'decrypt',
   ])
@@ -164,4 +164,40 @@ export async function decryptFileBytes(
   const iv = data.slice(0, 12)
   const ciphertext = data.slice(12)
   return decryptBytes(key, { iv, ciphertext })
+}
+
+// Passcode quick-unlock: derive a local key from a short passcode and wrap
+// the raw master key with it. The passphrase remains the source of truth.
+const LOCAL_PBKDF2_ITERATIONS = 250_000
+
+export async function deriveLocalKey(
+  passcode: string,
+  salt: Uint8Array,
+): Promise<CryptoKey> {
+  const material = await crypto.subtle.importKey(
+    'raw',
+    new TextEncoder().encode(passcode),
+    'PBKDF2',
+    false,
+    ['deriveBits'],
+  )
+  const bits = await crypto.subtle.deriveBits(
+    {
+      name: 'PBKDF2',
+      salt: new Uint8Array(salt),
+      iterations: LOCAL_PBKDF2_ITERATIONS,
+      hash: 'SHA-256',
+    },
+    material,
+    256,
+  )
+  return crypto.subtle.importKey('raw', bits, 'AES-GCM', false, [
+    'encrypt',
+    'decrypt',
+  ])
+}
+
+export async function exportMasterKeyRaw(masterKey: CryptoKey): Promise<Uint8Array> {
+  const raw = await crypto.subtle.exportKey('raw', masterKey)
+  return new Uint8Array(raw)
 }

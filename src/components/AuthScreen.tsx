@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useAuth } from '../lib/auth-context'
+import { SparkIcon } from './icons'
 
 type Mode = 'signin' | 'signup'
 
@@ -27,7 +28,9 @@ export function AuthScreen() {
     if (result.error) {
       setError(result.error)
     } else if (mode === 'signup') {
-      setNotice('Account created. Check your inbox for a confirmation email, then sign in.')
+      setNotice(
+        'Account created. Check your inbox for a confirmation email, then sign in.',
+      )
       setMode('signin')
     }
   }
@@ -35,6 +38,9 @@ export function AuthScreen() {
   return (
     <div className="auth-screen">
       <div className="auth-card">
+        <div className="brand-mark">
+          <SparkIcon size={26} />
+        </div>
         <h1 className="auth-title">Nofi</h1>
         <p className="auth-tagline">Notes. Files. Input. Output.</p>
 
@@ -63,7 +69,7 @@ export function AuthScreen() {
           {error && <p className="auth-error">{error}</p>}
           {notice && <p className="auth-notice">{notice}</p>}
 
-          <button type="submit" disabled={busy}>
+          <button type="submit" className="btn primary" disabled={busy}>
             {busy
               ? 'Please wait…'
               : mode === 'signin'

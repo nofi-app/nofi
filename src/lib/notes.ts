@@ -13,6 +13,7 @@ export function createNote(): NoteItem {
     pinned: false,
     archived: false,
     trashed: false,
+    locked: false,
     deleted: false,
     createdAt: now,
     updatedAt: now,
