@@ -281,6 +281,59 @@ body {
   background: var(--border);
 }
 
+.sidebar-btn.active {
+  background: var(--accent);
+  color: #fff;
+}
+
+.sidebar-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 0.6rem;
+  padding: 0.2rem 0.6rem;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.sidebar-mini-btn {
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.sidebar-mini-btn:hover {
+  background: var(--border);
+}
+
+.sidebar-new-input {
+  padding: 0 0.6rem 0.3rem;
+}
+
+.sidebar-new-input input {
+  width: 100%;
+  padding: 0.35rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 0.85rem;
+}
+
+.sidebar-btn.folder {
+  font-size: 0.85rem;
+}
+
 .sidebar-btn.primary {
   background: var(--accent);
   color: #fff;
@@ -411,6 +464,78 @@ body {
   display: flex;
   align-items: center;
   gap: 0.35rem;
+}
+
+.note-meta {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  padding: 0.45rem 0.9rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-muted);
+  flex-wrap: wrap;
+}
+
+.meta-label {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-right: 0.4rem;
+}
+
+.tag-editor {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.tag-chips {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  flex-wrap: wrap;
+}
+
+.tag-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 0.78rem;
+}
+
+.tag-chip-remove {
+  border: none;
+  background: none;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.85rem;
+  line-height: 1;
+  padding: 0;
+  cursor: pointer;
+}
+
+.tag-chip-remove:hover {
+  color: #fff;
+}
+
+.tag-input {
+  min-width: 90px;
+  padding: 0.2rem 0.4rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 0.8rem;
+}
+
+.tag-error {
+  color: var(--error);
+  font-size: 0.78rem;
 }
 
 .editor-select-wrap select {

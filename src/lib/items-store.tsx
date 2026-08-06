@@ -65,9 +65,9 @@ export function ItemsProvider({ children }: { children: ReactNode }) {
     if (!existing) return
     await updateItem({
       ...existing,
-      deleted: true,
+      trashed: true,
       updatedAt: Date.now(),
-    })
+    } as Item)
   }
 
   async function removeItem(id: string) {

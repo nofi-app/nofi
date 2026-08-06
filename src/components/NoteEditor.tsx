@@ -1,6 +1,7 @@
 import { Suspense, lazy, useEffect, useState } from 'react'
-import type { NoteEditorType, NoteItem } from '../lib/types'
+import type { FolderItem, NoteEditorType, NoteItem, TagItem } from '../lib/types'
 import { editorLabel } from '../lib/notes'
+import { folderPath } from '../lib/folders'
 import { TextEditor } from './editors/TextEditor'
 
 const MarkdownEditor = lazy(() =>
@@ -29,21 +30,33 @@ const EDITOR_TYPES: NoteEditorType[] = [
 
 interface NoteEditorProps {
   note: NoteItem
+  folders: FolderItem[]
+  tags: TagItem[]
   onUpdate: (note: NoteItem) => void
   onTrash: (id: string) => void
   onTogglePin: (note: NoteItem) => void
   onToggleArchive: (note: NoteItem) => void
+  onRestore: (note: NoteItem) => void
+  onDeleteForever: (id: string) => void
+  onAddTag: (name: string) => Promise<string | null>
 }
 
 export function NoteEditor({
   note,
+  folders,
+  tags,
   onUpdate,
   onTrash,
   onTogglePin,
   onToggleArchive,
+  onRestore,
+  onDeleteForever,
+  onAddTag,
 }: NoteEditorProps) {
   const [draft, setDraft] = useState<NoteItem>(note)
   const [dirty, setDirty] = useState(false)
+  const [tagInput, setTagInput] = useState('')
+  const [tagError, setTagError] = useState<string | null>(null)
 
   useEffect(() => {
     setDraft(note)
@@ -62,6 +75,21 @@ export function NoteEditor({
   function edit(patch: Partial<NoteItem>) {
     setDirty(true)
     setDraft((d) => ({ ...d, ...patch }))
+  }
+
+  async function addTag() {
+    const name = tagInput.trim()
+    setTagError(null)
+    if (!name) return
+    const existing = tags.find((t) => t.name.toLowerCase() === name.toLowerCase())
+    const id = existing ? existing.id : await onAddTag(name)
+    if (!id) return
+    if (!draft.tags.includes(id)) edit({ tags: [...draft.tags, id] })
+    setTagInput('')
+  }
+
+  function removeTag(id: string) {
+    edit({ tags: draft.tags.filter((t) => t !== id) })
   }
 
   function renderEditor() {
@@ -130,24 +158,106 @@ export function NoteEditor({
           >
             Pin
           </button>
-          <button
-            type="button"
-            className="toolbar-btn"
-            onClick={() => onToggleArchive(draft)}
-            title="Archive"
-          >
-            Archive
-          </button>
-          <button
-            type="button"
-            className="toolbar-btn danger"
-            onClick={() => onTrash(draft.id)}
-            title="Move to trash"
-          >
-            Delete
-          </button>
+          {!draft.trashed && (
+            <button
+              type="button"
+              className="toolbar-btn"
+              onClick={() => onToggleArchive(draft)}
+              title="Archive"
+            >
+              {draft.archived ? 'Unarchive' : 'Archive'}
+            </button>
+          )}
+          {!draft.trashed ? (
+            <button
+              type="button"
+              className="toolbar-btn danger"
+              onClick={() => onTrash(draft.id)}
+              title="Move to trash"
+            >
+              Delete
+            </button>
+          ) : (
+            <>
+              <button
+                type="button"
+                className="toolbar-btn"
+                onClick={() => onRestore(draft)}
+                title="Restore from trash"
+              >
+                Restore
+              </button>
+              <button
+                type="button"
+                className="toolbar-btn danger"
+                onClick={() => onDeleteForever(draft.id)}
+                title="Permanently delete"
+              >
+                Delete forever
+              </button>
+            </>
+          )}
         </div>
       </div>
+
+      <div className="note-meta">
+        <label className="editor-select-wrap">
+          <span className="meta-label">Folder</span>
+          <select
+            value={draft.folderId ?? ''}
+            onChange={(e) =>
+              edit({ folderId: e.target.value || null })
+            }
+          >
+            <option value="">No folder</option>
+            {folders.map((f) => (
+              <option key={f.id} value={f.id}>
+                {folderPath(folders, f.id)}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <div className="tag-editor">
+          <span className="meta-label">Tags</span>
+          <div className="tag-chips">
+            {draft.tags.map((id) => {
+              const tag = tags.find((t) => t.id === id)
+              if (!tag) return null
+              return (
+                <span key={id} className="tag-chip">
+                  {tag.name}
+                  <button
+                    type="button"
+                    className="tag-chip-remove"
+                    onClick={() => removeTag(id)}
+                    aria-label={`Remove tag ${tag.name}`}
+                  >
+                    ×
+                  </button>
+                </span>
+              )
+            })}
+            <input
+              className="tag-input"
+              value={tagInput}
+              onChange={(e) => setTagInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault()
+                  void addTag()
+                }
+              }}
+              onBlur={() => {
+                if (tagInput.trim()) void addTag()
+              }}
+              placeholder="Add tag…"
+            />
+          </div>
+          {tagError && <span className="tag-error">{tagError}</span>}
+        </div>
+      </div>
+
       {renderEditor()}
     </div>
   )

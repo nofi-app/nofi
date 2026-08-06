@@ -44,3 +44,9 @@ export interface FileItem extends BaseItem {
 }
 
 export type Item = NoteItem | TagItem | FolderItem | FileItem
+
+export type Filter =
+  | { kind: 'all' }
+  | { kind: 'trash' }
+  | { kind: 'tag'; id: string }
+  | { kind: 'folder'; id: string }

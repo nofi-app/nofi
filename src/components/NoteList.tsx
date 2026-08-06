@@ -1,13 +1,13 @@
 import { useMemo } from 'react'
-import type { NoteItem } from '../lib/types'
+import type { Filter, NoteItem } from '../lib/types'
 import { isNote } from '../lib/notes'
 import { useItems } from '../lib/items-context'
 
 interface NoteListProps {
+  filter: Filter
   search: string
   selectedId: string | null
   onSelect: (id: string) => void
-  showTrash: boolean
 }
 
 function snippet(note: NoteItem): string {
@@ -15,33 +15,48 @@ function snippet(note: NoteItem): string {
   return plain.slice(0, 90)
 }
 
-export function NoteList({ search, selectedId, onSelect, showTrash }: NoteListProps) {
+export function NoteList({ filter, search, selectedId, onSelect }: NoteListProps) {
   const { items } = useItems()
 
   const notes = useMemo(() => {
-    const filtered = items.filter(
-      (i): i is NoteItem =>
-        isNote(i) &&
-        i.trashed === showTrash &&
-        !i.deleted &&
-        (showTrash || !i.archived),
-    )
-    const q = search.trim().toLowerCase()
-    const matched = q
-      ? filtered.filter(
-          (n) =>
-            n.title.toLowerCase().includes(q) ||
-            snippet(n).toLowerCase().includes(q),
+    const notes = items.filter(isNote)
+    let filtered = notes.filter((n) => !n.deleted)
+
+    switch (filter.kind) {
+      case 'trash':
+        filtered = filtered.filter((n) => n.trashed)
+        break
+      case 'tag':
+        filtered = filtered.filter(
+          (n) => !n.trashed && !n.archived && n.tags.includes(filter.id),
         )
-      : filtered
-    return matched.sort((a, b) => {
+        break
+      case 'folder':
+        filtered = filtered.filter(
+          (n) => !n.trashed && !n.archived && n.folderId === filter.id,
+        )
+        break
+      default:
+        filtered = filtered.filter((n) => !n.trashed && !n.archived)
+    }
+
+    const q = search.trim().toLowerCase()
+    if (q) {
+      filtered = filtered.filter(
+        (n) =>
+          n.title.toLowerCase().includes(q) ||
+          snippet(n).toLowerCase().includes(q),
+      )
+    }
+
+    return filtered.sort((a, b) => {
       if (a.pinned !== b.pinned) return a.pinned ? -1 : 1
       return b.updatedAt - a.updatedAt
     })
-  }, [items, search, showTrash])
+  }, [items, filter, search])
 
   if (notes.length === 0) {
-    return <div className="note-list-empty">No notes yet</div>
+    return <div className="note-list-empty">No notes here</div>
   }
 
   return (
