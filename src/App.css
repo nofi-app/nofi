@@ -1029,6 +1029,56 @@ button {
   color: var(--text-muted);
 }
 
+.md-modes {
+  flex: none;
+  display: inline-flex;
+  align-self: flex-start;
+  margin: 0.5rem 1.4rem 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: var(--surface);
+}
+
+.md-mode {
+  padding: 0.25rem 0.8rem;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.md-mode.active {
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.md-mode:hover:not(.active) {
+  background: var(--bg-muted);
+}
+
+.md-split {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: 0;
+}
+
+.md-split > .note-editor-text {
+  border-right: 1px solid var(--border);
+}
+
+.md-split > .note-md-preview {
+  overflow-y: auto;
+}
+
+.note-md-preview img {
+  max-width: 100%;
+  border-radius: var(--radius-sm);
+}
+
 .editor-toggle {
   display: inline-flex;
   align-items: center;
