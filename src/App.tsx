@@ -47,11 +47,11 @@ function App() {
   return (
     <AuthProvider>
       <VaultProvider>
-        <ItemsProvider>
-          <ToastProvider>
+        <ToastProvider>
+          <ItemsProvider>
             <Gate />
-          </ToastProvider>
-        </ItemsProvider>
+          </ItemsProvider>
+        </ToastProvider>
       </VaultProvider>
     </AuthProvider>
   )

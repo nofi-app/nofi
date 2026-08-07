@@ -76,6 +76,64 @@ export async function pushItem(
   if (error) throw new Error(`Sync push failed: ${error.message}`)
 }
 
+export async function fetchItemRow(id: string): Promise<StoredRow | null> {
+  const { data, error } = await supabase
+    .from('items')
+    .select('*')
+    .eq('id', id)
+    .maybeSingle()
+  if (error) throw new Error(`Sync fetch failed: ${error.message}`)
+  if (!data || !isStoredRow(data)) return null
+  return data
+}
+
+export async function decryptStoredRow(
+  masterKey: CryptoKey,
+  row: StoredRow,
+): Promise<Item | null> {
+  try {
+    const parsed = JSON.parse(row.encrypted_content) as Parameters<
+      typeof decryptItem
+    >[1]
+    return await decryptItem(masterKey, parsed)
+  } catch {
+    console.warn('Skipping undecryptable item', row.id)
+    return null
+  }
+}
+
+/**
+ * A queued local edit conflicts with the server when the row on the server
+ * was updated after our local edit was created — meaning another device
+ * changed the same note while we were offline.
+ */
+export function isConflicting(
+  serverRow: StoredRow,
+  localItem: Item,
+): boolean {
+  return Date.parse(serverRow.updated_at) > localItem.updatedAt
+}
+
+/**
+ * Preserve a losing local edit by saving it as a separate "conflicted copy"
+ * note instead of overwriting the newer remote version. Non-note items (tags,
+ * folders, files) are additive, so conflicts can't occur for them.
+ */
+export function makeConflictCopy(item: Item): Item {
+  const now = Date.now()
+  if (item.type === 'note') {
+    return {
+      ...item,
+      id: crypto.randomUUID(),
+      title: `${item.title || 'Untitled'} (conflicted copy)`,
+      createdAt: now,
+      updatedAt: now,
+      deleted: false,
+    }
+  }
+  return item
+}
+
 /**
  * Decides how to replay the offline mutation queue against the current
  * tombstone set. add/update/trash mutations touching a tombstoned id are

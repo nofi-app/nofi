@@ -2,12 +2,17 @@ import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
 import type { Item } from './types'
 import { useAuth } from './auth-context'
 import { useVault } from './vault-context'
+import { useToasts } from './toast-context'
 import {
   pullUpdates,
   pushItem,
   subscribeToChanges,
   fetchDeletedIds,
   planQueueFlush,
+  fetchItemRow,
+  decryptStoredRow,
+  isConflicting,
+  makeConflictCopy,
 } from './sync'
 import { ItemsContext } from './items-context'
 import {
@@ -20,6 +25,7 @@ import {
 export function ItemsProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth()
   const { status, masterKey } = useVault()
+  const { push } = useToasts()
   const [items, setItems] = useState<Item[]>([])
   const [loading, setLoading] = useState(true)
   const [pendingCount, setPendingCount] = useState(0)
@@ -109,7 +115,27 @@ export function ItemsProvider({ children }: { children: ReactNode }) {
       }
       for (const mut of toPush) {
         try {
-          if (mut.type === 'add' || mut.type === 'update') {
+          if (mut.type === 'update') {
+            const item = mut.item as Item
+            // Another device may have edited the same note while we were
+            // offline. If the server version is newer, don't clobber it —
+            // preserve our local edit as a conflicted copy instead.
+            const row = await fetchItemRow(item.id).catch(() => null)
+            if (row && isConflicting(row, item)) {
+              const copy = makeConflictCopy(item)
+              await pushItem(u.id, k, copy)
+              const remote = await decryptStoredRow(k, row)
+              setItems((prev) => {
+                let next = prev.filter((i) => i.id !== item.id)
+                if (remote) next = [...next.filter((i) => i.id !== remote.id), remote]
+                return [...next, copy]
+              })
+              push('Note changed on another device — kept your edit as a copy', 'info')
+            } else {
+              await pushItem(u.id, k, item)
+              setItems((prev) => [...prev.filter((i) => i.id !== item.id), item])
+            }
+          } else if (mut.type === 'add') {
             const item = mut.item as Item
             await pushItem(u.id, k, item)
             setItems((prev) => [...prev.filter((i) => i.id !== item.id), item])
