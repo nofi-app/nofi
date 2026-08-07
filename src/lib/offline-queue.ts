@@ -2,9 +2,9 @@ const DB_NAME = 'nofi-offline-queue'
 const STORE_NAME = 'mutations'
 const DB_VERSION = 1
 
-type MutationType = 'add' | 'update' | 'trash' | 'remove'
+export type MutationType = 'add' | 'update' | 'trash' | 'remove'
 
-interface QueuedMutation {
+export interface QueuedMutation {
   id: number
   type: MutationType
   item: unknown
