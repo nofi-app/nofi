@@ -3,13 +3,7 @@ import { supabase } from './supabase'
 import type { Item } from './types'
 import { useAuth } from './auth-context'
 import { useVault } from './vault-context'
-import {
-  getLastSync,
-  pullUpdates,
-  pushItem,
-  setLastSync,
-  subscribeToChanges,
-} from './sync'
+import { pullUpdates, pushItem, subscribeToChanges } from './sync'
 import { ItemsContext } from './items-context'
 
 export function ItemsProvider({ children }: { children: ReactNode }) {
@@ -19,8 +13,7 @@ export function ItemsProvider({ children }: { children: ReactNode }) {
 
   const pull = useCallback(async () => {
     if (!user || !masterKey) return
-    const since = getLastSync(user.id)
-    const { items: fetched, lastSync } = await pullUpdates(masterKey, since)
+    const { items: fetched } = await pullUpdates(masterKey, null)
     if (fetched.length) {
       setItems((prev) => {
         const map = new Map(prev.map((i) => [i.id, i]))
@@ -28,7 +21,6 @@ export function ItemsProvider({ children }: { children: ReactNode }) {
         return [...map.values()]
       })
     }
-    setLastSync(user.id, lastSync)
   }, [user, masterKey])
 
   useEffect(() => {
