@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useEditor, EditorContent, useEditorState } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import Underline from '@tiptap/extension-underline'
 import Link from '@tiptap/extension-link'
+import Image from '@tiptap/extension-image'
 import {
   Bold,
   Code,
@@ -21,11 +22,17 @@ import {
   Undo2,
   Underline as UnderlineIcon,
 } from 'lucide-react'
+import { fileRefUrl } from '../../lib/inline-images'
 
 interface RichTextEditorProps {
   value: string
   onChange: (value: string) => void
+  insertImage?: (file: File) => Promise<string | null>
+  resolveImages?: (container: HTMLElement | null) => void
 }
+
+type EditorInstance = NonNullable<ReturnType<typeof useEditor>>
+type EditorRef = { current: EditorInstance | null }
 
 function ToolBtn({
   onClick,
@@ -53,9 +60,15 @@ function ToolBtn({
   )
 }
 
-export function RichTextEditor({ value, onChange }: RichTextEditorProps) {
+export function RichTextEditor({
+  value,
+  onChange,
+  insertImage,
+  resolveImages,
+}: RichTextEditorProps) {
   const [linkOpen, setLinkOpen] = useState(false)
   const [linkUrl, setLinkUrl] = useState('')
+  const editorRef: EditorRef = useRef<EditorInstance | null>(null)
 
   const editor = useEditor({
     extensions: [
@@ -66,12 +79,23 @@ export function RichTextEditor({ value, onChange }: RichTextEditorProps) {
         autolink: true,
         defaultProtocol: 'https',
       }),
+      Image.configure({ inline: true }),
     ],
     content: value,
     onUpdate: ({ editor }) => onChange(editor.getHTML()),
     editorProps: {
       attributes: { class: 'note-editor-rich' },
+      handlePaste: (_view, event) =>
+        handleImageTransfer(event.clipboardData, editorRef, insertImage),
+      handleDrop: (_view, event) =>
+        handleImageTransfer(event.dataTransfer, editorRef, insertImage),
     },
+  })
+  editorRef.current = editor
+
+  useEffect(() => {
+    if (!editor || !resolveImages) return
+    resolveImages(editor.view.dom as HTMLElement)
   })
 
   const state = useEditorState({
@@ -286,4 +310,27 @@ export function RichTextEditor({ value, onChange }: RichTextEditorProps) {
       <EditorContent editor={editor} />
     </div>
   )
+}
+
+function handleImageTransfer(
+  dt: DataTransfer | null,
+  editorRef: EditorRef,
+  insertImage: ((file: File) => Promise<string | null>) | undefined,
+): boolean {
+  if (!dt) return false
+  const files = Array.from(dt.files).filter((f) => f.type.startsWith('image/'))
+  if (!files.length) return false
+  for (const file of files) {
+    void (async () => {
+      const id = insertImage ? await insertImage(file) : null
+      if (id) {
+        editorRef.current
+          ?.chain()
+          .focus()
+          .setImage({ src: fileRefUrl(id), alt: file.name })
+          .run()
+      }
+    })()
+  }
+  return true
 }

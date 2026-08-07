@@ -1242,6 +1242,13 @@ button {
   background: transparent;
 }
 
+.note-editor-rich img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 6px;
+  cursor: default;
+}
+
 .note-code-wrap {
   flex: 1;
   min-height: 0;

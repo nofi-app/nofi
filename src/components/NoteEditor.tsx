@@ -1,8 +1,17 @@
 import { Suspense, lazy, useCallback, useEffect, useState } from 'react'
-import type { FolderItem, NoteEditorType, NoteItem, TagItem } from '../lib/types'
+import type {
+  FileItem,
+  FolderItem,
+  NoteEditorType,
+  NoteItem,
+  TagItem,
+} from '../lib/types'
 import { editorLabel } from '../lib/notes'
 import { folderPath } from '../lib/folders'
 import { useVault } from '../lib/vault-context'
+import { useItems } from '../lib/items-context'
+import { uploadAttachment } from '../lib/files'
+import { resolveImagesIn } from '../lib/inline-images'
 import {
   AlertIcon,
   ArchiveIcon,
@@ -69,7 +78,8 @@ export function NoteEditor({
   onDeleteForever,
   onAddTag,
 }: NoteEditorProps) {
-  const { unlock } = useVault()
+  const { unlock, masterKey } = useVault()
+  const { items, addItem } = useItems()
   const [draft, setDraft] = useState<NoteItem>(note)
   const [dirty, setDirty] = useState(false)
   const [saveState, setSaveState] = useState<SaveState>('idle')
@@ -143,6 +153,31 @@ export function NoteEditor({
     setUnlockPass('')
   }
 
+  const insertImage = useCallback(
+    async (file: File): Promise<string | null> => {
+      if (!masterKey) return null
+      try {
+        const item = await uploadAttachment(masterKey, draft.id, file)
+        await addItem(item)
+        return item.id
+      } catch (err) {
+        console.error('Image upload failed:', err)
+        return null
+      }
+    },
+    [masterKey, draft.id, addItem],
+  )
+
+  const resolveImages = useCallback(
+    (container: HTMLElement | null) => {
+      if (!masterKey) return
+      const getFile = (id: string) =>
+        items.find((i): i is FileItem => i.type === 'file' && i.id === id)
+      resolveImagesIn(container, masterKey, getFile)
+    },
+    [items, masterKey],
+  )
+
   function renderEditor() {
     const { editor, text } = draft
     return (
@@ -154,6 +189,8 @@ export function NoteEditor({
                 <MarkdownEditor
                   value={text}
                   onChange={(v) => edit({ text: v })}
+                  insertImage={insertImage}
+                  resolveImages={resolveImages}
                 />
               )
             case 'rich':
@@ -161,6 +198,8 @@ export function NoteEditor({
                 <RichTextEditor
                   value={text}
                   onChange={(v) => edit({ text: v })}
+                  insertImage={insertImage}
+                  resolveImages={resolveImages}
                 />
               )
             case 'code':
