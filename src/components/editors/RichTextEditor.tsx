@@ -29,6 +29,7 @@ import {
   type NoteLinkSuggest,
 } from '../../lib/note-links'
 import { NoteLinkPopup } from '../NoteLinkPopup'
+import { FindBar } from '../FindBar'
 
 interface RichTextEditorProps {
   value: string
@@ -37,6 +38,8 @@ interface RichTextEditorProps {
   resolveImages?: (container: HTMLElement | null) => void
   notes?: { id: string; title: string }[]
   excludeId?: string
+  findOpen?: boolean
+  onFindClose?: () => void
 }
 
 type EditorInstance = NonNullable<ReturnType<typeof useEditor>>
@@ -75,6 +78,8 @@ export function RichTextEditor({
   resolveImages,
   notes,
   excludeId,
+  findOpen,
+  onFindClose,
 }: RichTextEditorProps) {
   const [linkOpen, setLinkOpen] = useState(false)
   const [linkUrl, setLinkUrl] = useState('')
@@ -409,6 +414,14 @@ export function RichTextEditor({
             Apply
           </button>
         </div>
+      )}
+
+      {findOpen && onFindClose && (
+        <FindBar
+          value={editor.state.doc.textContent}
+          editor={editor}
+          onClose={onFindClose}
+        />
       )}
 
       <EditorContent editor={editor} />

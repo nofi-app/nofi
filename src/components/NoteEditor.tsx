@@ -99,6 +99,7 @@ export function NoteEditor({
   const [unlockBusy, setUnlockBusy] = useState(false)
   const [templateSaved, setTemplateSaved] = useState(false)
   const [showBacklinks, setShowBacklinks] = useState(false)
+  const [findOpen, setFindOpen] = useState(false)
 
   const noteRefList = useMemo(
     () => noteRefs(items.filter(isNote)),
@@ -114,7 +115,21 @@ export function NoteEditor({
     setDirty(false)
     setSaveState('idle')
     setTemplateSaved(false)
+    setFindOpen(false)
+    setShowBacklinks(false)
   }, [note.id]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (!(e.metaKey || e.ctrlKey) || e.key.toLowerCase() !== 'f') return
+      if (draft.trashed || draft.locked) return
+      if (draft.editor === 'code' || draft.editor === 'checklist') return
+      e.preventDefault()
+      setFindOpen(true)
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [draft.editor, draft.trashed, draft.locked])
 
   const save = useCallback(
     async (current: NoteItem) => {
@@ -220,6 +235,8 @@ export function NoteEditor({
                   notes={noteRefList}
                   excludeId={draft.id}
                   onOpenNote={onOpenNote}
+                  findOpen={findOpen}
+                  onFindClose={() => setFindOpen(false)}
                 />
               )
             case 'rich':
@@ -231,6 +248,8 @@ export function NoteEditor({
                   resolveImages={resolveImages}
                   notes={noteRefList}
                   excludeId={draft.id}
+                  findOpen={findOpen}
+                  onFindClose={() => setFindOpen(false)}
                 />
               )
             case 'code':
@@ -246,7 +265,12 @@ export function NoteEditor({
               )
             default:
               return (
-                <TextEditor value={text} onChange={(v) => edit({ text: v })} />
+                <TextEditor
+                  value={text}
+                  onChange={(v) => edit({ text: v })}
+                  findOpen={findOpen}
+                  onFindClose={() => setFindOpen(false)}
+                />
               )
           }
         })()}

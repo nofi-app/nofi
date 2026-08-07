@@ -1060,6 +1060,70 @@ mark {
   outline: none;
 }
 
+.note-text-wrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  min-height: 0;
+}
+
+.find-bar {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.75rem;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.3rem 0.45rem;
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-pop);
+  color: var(--text-muted);
+}
+
+.find-bar input {
+  width: 150px;
+  padding: 0.25rem 0.45rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 0.82rem;
+}
+
+.find-bar input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.find-count {
+  font-size: 0.72rem;
+  color: var(--text-faint);
+  min-width: 34px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.find-btn {
+  display: grid;
+  place-items: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.find-btn:hover {
+  background: var(--bg-subtle);
+  color: var(--text);
+}
+
 .note-md-wrap {
   flex: 1;
   display: flex;

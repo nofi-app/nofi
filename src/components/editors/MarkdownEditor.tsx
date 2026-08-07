@@ -26,6 +26,7 @@ import {
   type NoteLinkSuggest,
 } from '../../lib/note-links'
 import { NoteLinkPopup } from '../NoteLinkPopup'
+import { FindBar } from '../FindBar'
 
 interface MarkdownEditorProps {
   value: string
@@ -35,6 +36,8 @@ interface MarkdownEditorProps {
   notes?: { id: string; title: string }[]
   excludeId?: string
   onOpenNote?: (id: string) => void
+  findOpen?: boolean
+  onFindClose?: () => void
 }
 
 type Mode = 'write' | 'split' | 'preview'
@@ -47,6 +50,8 @@ export function MarkdownEditor({
   notes,
   excludeId,
   onOpenNote,
+  findOpen,
+  onFindClose,
 }: MarkdownEditorProps) {
   const [mode, setMode] = useState<Mode>('write')
   const ref = useRef<HTMLTextAreaElement>(null)
@@ -357,6 +362,9 @@ export function MarkdownEditor({
         onPick={pickSuggestion}
         style={{ top: '48px' }}
       />
+      {findOpen && onFindClose && (
+        <FindBar value={value} textareaRef={ref} onClose={onFindClose} />
+      )}
       {mode === 'split' ? (
         <div className="md-split">
           <textarea ref={ref} {...textareaProps} />
