@@ -26,6 +26,7 @@ import { TextEditor } from './editors/TextEditor'
 import { ChecklistEditor } from './editors/ChecklistEditor'
 import { FileAttachments } from './FileAttachments'
 import { RevisionHistory } from './RevisionHistory'
+import { EditorStats } from './EditorStats'
 
 const MarkdownEditor = lazy(() =>
   import('./editors/MarkdownEditor').then((m) => ({
@@ -432,6 +433,10 @@ export function NoteEditor({
         </div>
       ) : (
         renderEditor()
+      )}
+
+      {!draft.locked && !draft.trashed && (
+        <EditorStats text={draft.text} editor={draft.editor} />
       )}
     </div>
   )

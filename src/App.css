@@ -1384,6 +1384,16 @@ button {
   color: var(--text-faint);
 }
 
+.editor-stats {
+  flex: none;
+  display: flex;
+  gap: 1rem;
+  padding: 0.35rem 1.4rem;
+  border-top: 1px solid var(--border);
+  color: var(--text-faint);
+  font-size: 0.72rem;
+}
+
 .editor-loading {
   flex: 1;
   display: grid;
