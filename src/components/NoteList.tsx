@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import type { Filter, NoteItem } from '../lib/types'
 import { isNote } from '../lib/notes'
 import { useItems } from '../lib/items-context'
-import { PinIcon } from './icons'
+import { PinIcon, TagIcon } from './icons'
 
 export type SortMode = 'updated' | 'created' | 'title'
 
@@ -16,9 +16,36 @@ interface NoteListProps {
   onSelect: (id: string) => void
 }
 
-function snippet(note: NoteItem): string {
-  const plain = note.text.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim()
-  return plain.slice(0, 90)
+function plainText(note: NoteItem): string {
+  return note.text.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim()
+}
+
+function snippet(note: NoteItem, q: string): React.ReactNode {
+  const plain = plainText(note)
+  const s = plain.slice(0, 90)
+  if (!q) return s
+  const idx = s.toLowerCase().indexOf(q)
+  if (idx === -1) return s
+  return (
+    <>
+      {s.slice(0, idx)}
+      <mark>{s.slice(idx, idx + q.length)}</mark>
+      {s.slice(idx + q.length)}
+    </>
+  )
+}
+
+function highlight(text: string, q: string): React.ReactNode {
+  if (!q) return text
+  const idx = text.toLowerCase().indexOf(q)
+  if (idx === -1) return text
+  return (
+    <>
+      {text.slice(0, idx)}
+      <mark>{text.slice(idx, idx + q.length)}</mark>
+      {text.slice(idx + q.length)}
+    </>
+  )
 }
 
 function relativeTime(ts: number): string {
@@ -44,8 +71,13 @@ export function NoteList({
 }: NoteListProps) {
   const { items } = useItems()
 
-  const notes = useMemo(() => {
+  const { notes, tagNames } = useMemo(() => {
     const all = items.filter(isNote)
+    const tagsById = new Map(
+      items
+        .filter((i) => i.type === 'tag')
+        .map((i) => [i.id, (i as { name: string }).name]),
+    )
     let filtered = all.filter((n) => !n.deleted)
 
     switch (filter.kind) {
@@ -68,14 +100,20 @@ export function NoteList({
 
     const q = search.trim().toLowerCase()
     if (q) {
-      filtered = filtered.filter(
-        (n) =>
+      filtered = filtered.filter((n) => {
+        if (
           n.title.toLowerCase().includes(q) ||
-          snippet(n).toLowerCase().includes(q),
-      )
+          plainText(n).toLowerCase().includes(q)
+        ) {
+          return true
+        }
+        return n.tags.some((id) =>
+          (tagsById.get(id) ?? '').toLowerCase().includes(q),
+        )
+      })
     }
 
-    return filtered.sort((a, b) => {
+    const sorted = filtered.sort((a, b) => {
       switch (sort) {
         case 'created':
           return b.createdAt - a.createdAt
@@ -86,7 +124,11 @@ export function NoteList({
           return b.updatedAt - a.updatedAt
       }
     })
+
+    return { notes: sorted, tagNames: tagsById }
   }, [items, filter, search, sort])
+
+  const q = search.trim()
 
   return (
     <div className="note-list-pane">
@@ -123,9 +165,25 @@ export function NoteList({
                   <PinIcon size={13} />
                 </span>
               )}
-              {n.title || 'Untitled'}
+              {highlight(n.title || 'Untitled', q)}
             </span>
-            {!n.trashed && <span className="note-list-snippet">{snippet(n)}</span>}
+            {!n.trashed && (
+              <span className="note-list-snippet">{snippet(n, q)}</span>
+            )}
+            {n.tags.length > 0 && (
+              <span className="note-list-tags">
+                {n.tags.slice(0, 2).map((id) => {
+                  const name = tagNames.get(id)
+                  if (!name) return null
+                  return (
+                    <span key={id} className="list-tag">
+                      <TagIcon size={11} />
+                      {name}
+                    </span>
+                  )
+                })}
+              </span>
+            )}
             <span className="note-list-meta">
               {n.locked && <span>Locked</span>}
               {n.archived && <span>Archived</span>}

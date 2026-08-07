@@ -21,6 +21,7 @@ function note(id: string, title: string, text: string): NoteItem {
     archived: false,
     trashed: false,
     locked: false,
+    deleted: false,
     createdAt: 1,
     updatedAt: 1,
   }
