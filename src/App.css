@@ -526,6 +526,58 @@ button {
   font-size: 0.84rem;
 }
 
+.new-note-wrap {
+  position: relative;
+}
+
+.new-note-menu {
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  z-index: 40;
+  max-height: 300px;
+  overflow-y: auto;
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-pop);
+  padding: 0.3rem;
+}
+
+.new-note-menu-title {
+  padding: 0.3rem 0.5rem 0.2rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-faint);
+}
+
+.new-note-option {
+  display: block;
+  width: 100%;
+  padding: 0.4rem 0.5rem;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.new-note-option:hover {
+  background: var(--bg-subtle);
+  color: var(--text);
+}
+
+.template-saved {
+  font-size: 0.72rem;
+  color: var(--notice);
+  white-space: nowrap;
+}
+
 .sidebar-label {
   display: flex;
   align-items: center;

@@ -7,6 +7,7 @@ import { createFolder, isFolder } from '../lib/folders'
 import { saveRevision } from '../lib/revisions'
 import { exportJson, exportMarkdown, parseImport } from '../lib/export'
 import { applyTheme, getTheme, setTheme, type Theme } from '../lib/theme'
+import { allTemplates, saveUserTemplate, type Template } from '../lib/templates'
 import type { Filter, NoteItem } from '../lib/types'
 import {
   DownloadIcon,
@@ -42,6 +43,7 @@ export function NotesApp() {
   const [newFolderParent, setNewFolderParent] = useState<string | null>(null)
   const [theme, setThemeState] = useState<Theme>(() => getTheme())
   const [showHelp, setShowHelp] = useState(false)
+  const [newMenuOpen, setNewMenuOpen] = useState(false)
   const searchRef = useRef<HTMLInputElement>(null)
   const importRef = useRef<HTMLInputElement>(null)
   const lastRevisionAt = useRef(new Map<string, number>())
@@ -98,6 +100,21 @@ export function NotesApp() {
       setFilter({ kind: 'all' })
       setSelectedId(note.id)
     })
+  }
+
+  function newFromTemplate(tpl: Template) {
+    run(async () => {
+      const note = createNote()
+      note.editor = tpl.editor
+      note.text = tpl.text
+      await addItem(note)
+      setFilter({ kind: 'all' })
+      setSelectedId(note.id)
+    })
+  }
+
+  function saveTemplateFrom(note: NoteItem) {
+    saveUserTemplate(note)
   }
 
   async function handleUpdate(note: NoteItem): Promise<void> {
@@ -390,10 +407,34 @@ export function NotesApp() {
               Empty trash
             </button>
           )}
-          <button type="button" className="sidebar-btn primary" onClick={newNote}>
-            <PlusIcon size={15} />
-            New note
-          </button>
+          <div className="new-note-wrap">
+            <button
+              type="button"
+              className="sidebar-btn primary"
+              onClick={() => setNewMenuOpen((o) => !o)}
+            >
+              <PlusIcon size={15} />
+              New note
+            </button>
+            {newMenuOpen && (
+              <div className="new-note-menu">
+                <div className="new-note-menu-title">Templates</div>
+                {allTemplates().map((t) => (
+                  <button
+                    key={t.id}
+                    type="button"
+                    className="new-note-option"
+                    onClick={() => {
+                      newFromTemplate(t)
+                      setNewMenuOpen(false)
+                    }}
+                  >
+                    {t.name}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         </aside>
 
         <NoteList
@@ -420,6 +461,7 @@ export function NotesApp() {
               onRestore={restore}
               onDeleteForever={deleteForever}
               onAddTag={addTag}
+              onSaveTemplate={saveTemplateFrom}
             />
           ) : (
             <div className="editor-empty">

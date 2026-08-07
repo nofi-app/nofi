@@ -20,6 +20,7 @@ import {
   LockIcon,
   PinIcon,
   RestoreIcon,
+  SparkIcon,
   TrashIcon,
 } from './icons'
 import { TextEditor } from './editors/TextEditor'
@@ -65,6 +66,7 @@ interface NoteEditorProps {
   onRestore: (note: NoteItem) => void
   onDeleteForever: (id: string) => void
   onAddTag: (name: string) => Promise<string | null>
+  onSaveTemplate: (note: NoteItem) => void
 }
 
 export function NoteEditor({
@@ -78,6 +80,7 @@ export function NoteEditor({
   onRestore,
   onDeleteForever,
   onAddTag,
+  onSaveTemplate,
 }: NoteEditorProps) {
   const { unlock, masterKey } = useVault()
   const { items, addItem } = useItems()
@@ -90,11 +93,13 @@ export function NoteEditor({
   const [unlockPass, setUnlockPass] = useState('')
   const [unlockError, setUnlockError] = useState<string | null>(null)
   const [unlockBusy, setUnlockBusy] = useState(false)
+  const [templateSaved, setTemplateSaved] = useState(false)
 
   useEffect(() => {
     setDraft(note)
     setDirty(false)
     setSaveState('idle')
+    setTemplateSaved(false)
   }, [note.id]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const save = useCallback(
@@ -152,6 +157,12 @@ export function NoteEditor({
     }
     edit({ locked: false })
     setUnlockPass('')
+  }
+
+  function handleSaveTemplate() {
+    onSaveTemplate(draft)
+    setTemplateSaved(true)
+    window.setTimeout(() => setTemplateSaved(false), 2000)
   }
 
   const insertImage = useCallback(
@@ -300,6 +311,17 @@ export function NoteEditor({
               <HistoryIcon size={15} />
             </button>
           )}
+          {!draft.trashed && (
+            <button
+              type="button"
+              className="toolbar-btn"
+              onClick={handleSaveTemplate}
+              title="Save as template"
+            >
+              <SparkIcon size={15} />
+            </button>
+          )}
+          {templateSaved && <span className="template-saved">Template saved</span>}
           {!draft.trashed && (
             <button
               type="button"
