@@ -15,14 +15,13 @@ export function ItemsProvider({ children }: { children: ReactNode }) {
   const pull = useCallback(async () => {
     if (!user || !masterKey) return
     const { items: fetched } = await pullUpdates(masterKey, null)
-    if (fetched.length) {
-      setItems((prev) => {
-        const map = new Map(prev.map((i) => [i.id, i]))
-        for (const it of fetched) map.set(it.id, it)
-        return [...map.values()]
-      })
-    }
+    setItems(fetched)
   }, [user, masterKey])
+
+  useEffect(() => {
+    setItems([])
+    setLoading(true)
+  }, [user?.id])
 
   useEffect(() => {
     if (status === 'unlocked') {
