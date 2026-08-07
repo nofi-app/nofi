@@ -45,7 +45,7 @@ interface FolderNode {
 const BUILTIN_IDS = new Set(BUILTIN_TEMPLATES.map((t) => t.id))
 
 export function NotesApp() {
-  const { items, addItem, updateItem, trashItem, removeItem } = useItems()
+  const { items, addItem, updateItem, trashItem, removeItem, pendingCount } = useItems()
   const { lock, masterKey } = useVault()
   const { push } = useToasts()
   const [selectedId, setSelectedId] = useState<string | null>(null)
@@ -438,7 +438,8 @@ export function NotesApp() {
 
       {offline && (
         <div className="offline-banner">
-          You’re offline — changes will save when you reconnect.
+          You’re offline
+          {pendingCount > 0 && <span> — {pendingCount} change{pendingCount === 1 ? '' : 's'} pending, will sync when you reconnect</span>}
         </div>
       )}
 

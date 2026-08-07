@@ -4,6 +4,7 @@ import type { Item } from './types'
 export interface ItemsContextValue {
   items: Item[]
   loading: boolean
+  pendingCount: number
   addItem: (item: Item) => Promise<void>
   updateItem: (item: Item) => Promise<void>
   trashItem: (id: string) => Promise<void>
