@@ -7,7 +7,13 @@ import { createFolder, isFolder } from '../lib/folders'
 import { saveRevision } from '../lib/revisions'
 import { exportJson, exportMarkdown, parseImport } from '../lib/export'
 import { applyTheme, getTheme, setTheme, type Theme } from '../lib/theme'
-import { allTemplates, saveUserTemplate, type Template } from '../lib/templates'
+import {
+  allTemplates,
+  BUILTIN_TEMPLATES,
+  removeUserTemplate,
+  saveUserTemplate,
+  type Template,
+} from '../lib/templates'
 import type { Filter, NoteItem } from '../lib/types'
 import {
   DownloadIcon,
@@ -17,6 +23,7 @@ import {
   NotesIcon,
   PlusIcon,
   SearchIcon,
+  SettingsIcon,
   SparkIcon,
   SunIcon,
   TagIcon,
@@ -26,15 +33,21 @@ import {
 import { NoteList, type SortMode } from './NoteList'
 import { NoteEditor } from './NoteEditor'
 import { ShortcutsHelp } from './ShortcutsHelp'
+import { ConfirmDialog } from './ConfirmDialog'
+import { SettingsModal } from './SettingsModal'
+import { useToasts } from '../lib/toast-context'
 
 interface FolderNode {
   folder: { id: string; name: string }
   children: FolderNode[]
 }
 
+const BUILTIN_IDS = new Set(BUILTIN_TEMPLATES.map((t) => t.id))
+
 export function NotesApp() {
   const { items, addItem, updateItem, trashItem, removeItem } = useItems()
   const { lock, masterKey } = useVault()
+  const { push } = useToasts()
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [search, setSearch] = useState('')
   const [filter, setFilter] = useState<Filter>({ kind: 'all' })
@@ -43,7 +56,15 @@ export function NotesApp() {
   const [newFolderParent, setNewFolderParent] = useState<string | null>(null)
   const [theme, setThemeState] = useState<Theme>(() => getTheme())
   const [showHelp, setShowHelp] = useState(false)
+  const [showSettings, setShowSettings] = useState(false)
   const [newMenuOpen, setNewMenuOpen] = useState(false)
+  const [offline, setOffline] = useState(!navigator.onLine)
+  const [confirm, setConfirm] = useState<{
+    title: string
+    message: string
+    confirmLabel: string
+    onConfirm: () => void
+  } | null>(null)
   const searchRef = useRef<HTMLInputElement>(null)
   const importRef = useRef<HTMLInputElement>(null)
   const lastRevisionAt = useRef(new Map<string, number>())
@@ -117,7 +138,33 @@ export function NotesApp() {
     saveUserTemplate(note)
   }
 
+  async function rewriteBacklinks(oldTitle: string, newTitle: string) {
+    const oldRef = `[[${oldTitle}]]`
+    const newRef = `[[${newTitle}]]`
+    if (oldRef === newRef) return
+    const targets = items.filter(
+      (i): i is NoteItem => isNote(i) && i.text.includes(oldRef),
+    )
+    if (!targets.length) return
+    for (const n of targets) {
+      await updateItem({
+        ...n,
+        text: n.text.split(oldRef).join(newRef),
+        updatedAt: Date.now(),
+      })
+    }
+    push(
+      targets.length === 1
+        ? `Updated 1 note that linked to this one`
+        : `Updated ${targets.length} notes that linked to this one`,
+      'success',
+    )
+  }
+
   async function handleUpdate(note: NoteItem): Promise<void> {
+    const prev = items.find(
+      (i): i is NoteItem => isNote(i) && i.id === note.id,
+    )
     if (masterKey) {
       const last = lastRevisionAt.current.get(note.id) ?? 0
       if (Date.now() - last > 5 * 60 * 1000) {
@@ -128,6 +175,11 @@ export function NotesApp() {
       }
     }
     await updateItem(note)
+    if (prev && prev.title !== note.title && note.title.trim()) {
+      void rewriteBacklinks(prev.title.trim(), note.title.trim()).catch((err) =>
+        console.warn('Backlink rewrite failed:', err),
+      )
+    }
   }
 
   function handleTrash(id: string) {
@@ -157,17 +209,49 @@ export function NotesApp() {
   }
 
   function deleteForever(id: string) {
-    run(async () => {
-      await removeItem(id)
-      setSelectedId(null)
+    const note = notes.find((n) => n.id === id)
+    setConfirm({
+      title: 'Delete forever?',
+      message: `“${note?.title || 'Untitled'}” will be permanently erased. This cannot be undone.`,
+      confirmLabel: 'Delete forever',
+      onConfirm: () => {
+        setConfirm(null)
+        run(async () => {
+          await removeItem(id)
+          setSelectedId(null)
+          push('Note deleted forever', 'success')
+        })
+      },
     })
   }
 
   function emptyTrash() {
     const trashed = notes.filter((n) => n.trashed)
-    run(async () => {
-      for (const n of trashed) await removeItem(n.id)
+    if (!trashed.length) return
+    setConfirm({
+      title: 'Empty trash?',
+      message: `${trashed.length} note${trashed.length === 1 ? '' : 's'} will be permanently erased. This cannot be undone.`,
+      confirmLabel: 'Empty trash',
+      onConfirm: () => {
+        setConfirm(null)
+        run(async () => {
+          for (const n of trashed) await removeItem(n.id)
+          push('Trash emptied', 'success')
+        })
+      },
     })
+  }
+
+  function handleExport(kind: 'json' | 'markdown') {
+    const count = notes.filter((n) => !n.trashed).length
+    if (kind === 'json') exportJson(items)
+    else exportMarkdown(items)
+    push(
+      count === 1
+        ? 'Exported 1 note'
+        : `Exported ${count} notes`,
+      'success',
+    )
   }
 
   function addTag(name: string): Promise<string | null> {
@@ -189,6 +273,14 @@ export function NotesApp() {
       for (const tag of data.tags) await addItem(tag)
       for (const note of data.notes) await addItem(note)
       setError(null)
+      const count =
+        data.notes.length + data.tags.length + data.folders.length
+      push(
+        count === 1
+          ? 'Imported 1 item'
+          : `Imported ${count} items`,
+        'success',
+      )
     })
   }
 
@@ -203,6 +295,26 @@ export function NotesApp() {
     applyTheme(theme)
   }, [theme])
 
+  const activeNoteRef = useRef<NoteItem | null>(activeNote)
+  activeNoteRef.current = activeNote
+
+  useEffect(() => {
+    function onOnline() {
+      setOffline(false)
+      push('Back online', 'success')
+    }
+    function onOffline() {
+      setOffline(true)
+      push('You are offline. Changes will save when you reconnect.', 'error')
+    }
+    window.addEventListener('online', onOnline)
+    window.addEventListener('offline', onOffline)
+    return () => {
+      window.removeEventListener('online', onOnline)
+      window.removeEventListener('offline', onOffline)
+    }
+  }, [push])
+
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       const mod = e.metaKey || e.ctrlKey
@@ -210,6 +322,7 @@ export function NotesApp() {
         e.preventDefault()
         newNote()
       } else if (mod && !e.shiftKey && e.key.toLowerCase() === 'f') {
+        if (activeNoteRef.current) return
         e.preventDefault()
         searchRef.current?.focus()
       } else if (mod && !e.shiftKey && e.key.toLowerCase() === 'e') {
@@ -226,7 +339,7 @@ export function NotesApp() {
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [newNote, lock]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [newNote, lock, push]) // eslint-disable-line react-hooks/exhaustive-deps
 
   function renderFolder(node: FolderNode, depth: number) {
     const selectedHere = filter.kind === 'folder' && filter.id === node.folder.id
@@ -271,6 +384,14 @@ export function NotesApp() {
           <button
             type="button"
             className="icon-btn"
+            onClick={() => setShowSettings(true)}
+            title="Settings"
+          >
+            <SettingsIcon size={16} />
+          </button>
+          <button
+            type="button"
+            className="icon-btn"
             onClick={() => setShowHelp(true)}
             title="Keyboard shortcuts"
           >
@@ -282,6 +403,12 @@ export function NotesApp() {
           </button>
         </div>
       </header>
+
+      {offline && (
+        <div className="offline-banner">
+          You’re offline — changes will save when you reconnect.
+        </div>
+      )}
 
       <div className="app-body">
         {error && <div className="error-banner">{error}</div>}
@@ -358,7 +485,7 @@ export function NotesApp() {
             <button
               type="button"
               className="sidebar-btn"
-              onClick={() => exportJson(items)}
+              onClick={() => handleExport('json')}
             >
               <DownloadIcon size={15} />
               Export JSON
@@ -366,7 +493,7 @@ export function NotesApp() {
             <button
               type="button"
               className="sidebar-btn"
-              onClick={() => exportMarkdown(items)}
+              onClick={() => handleExport('markdown')}
             >
               <DownloadIcon size={15} />
               Export Markdown
@@ -419,19 +546,37 @@ export function NotesApp() {
             {newMenuOpen && (
               <div className="new-note-menu">
                 <div className="new-note-menu-title">Templates</div>
-                {allTemplates().map((t) => (
-                  <button
-                    key={t.id}
-                    type="button"
-                    className="new-note-option"
-                    onClick={() => {
-                      newFromTemplate(t)
-                      setNewMenuOpen(false)
-                    }}
-                  >
-                    {t.name}
-                  </button>
-                ))}
+                {allTemplates().map((t) => {
+                  const isBuiltin = BUILTIN_IDS.has(t.id)
+                  return (
+                    <div key={t.id} className="new-note-option-row">
+                      <button
+                        type="button"
+                        className="new-note-option"
+                        onClick={() => {
+                          newFromTemplate(t)
+                          setNewMenuOpen(false)
+                        }}
+                      >
+                        {t.name}
+                      </button>
+                      {!isBuiltin && (
+                        <button
+                          type="button"
+                          className="new-note-option-del"
+                          title="Delete template"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            removeUserTemplate(t.id)
+                            push('Template deleted', 'success')
+                          }}
+                        >
+                          ×
+                        </button>
+                      )}
+                    </div>
+                  )
+                })}
               </div>
             )}
           </div>
@@ -487,6 +632,26 @@ export function NotesApp() {
       </div>
 
       {showHelp && <ShortcutsHelp onClose={() => setShowHelp(false)} />}
+      {showSettings && (
+        <SettingsModal
+          items={items}
+          theme={theme}
+          onThemeChange={(t) => {
+            setTheme(t)
+            setThemeState(t)
+          }}
+          onClose={() => setShowSettings(false)}
+        />
+      )}
+      {confirm && (
+        <ConfirmDialog
+          title={confirm.title}
+          message={confirm.message}
+          confirmLabel={confirm.confirmLabel}
+          onConfirm={confirm.onConfirm}
+          onCancel={() => setConfirm(null)}
+        />
+      )}
     </div>
   )
 }

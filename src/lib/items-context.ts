@@ -3,6 +3,7 @@ import type { Item } from './types'
 
 export interface ItemsContextValue {
   items: Item[]
+  loading: boolean
   addItem: (item: Item) => Promise<void>
   updateItem: (item: Item) => Promise<void>
   trashItem: (id: string) => Promise<void>

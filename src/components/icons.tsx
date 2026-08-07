@@ -15,6 +15,7 @@ import {
   Plus,
   RotateCcw,
   Search,
+  Settings,
   Sparkles,
   Sun,
   Tag,
@@ -48,4 +49,5 @@ export const AlertIcon = (p: IconProps) => <AlertCircle {...p} />
 export const RestoreIcon = (p: IconProps) => <RotateCcw {...p} />
 export const ChevronIcon = (p: IconProps) => <ChevronDown {...p} />
 export const LinkIcon = (p: IconProps) => <Link {...p} />
+export const SettingsIcon = (p: IconProps) => <Settings {...p} />
 

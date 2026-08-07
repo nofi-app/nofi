@@ -176,6 +176,11 @@ button {
   background: var(--accent-soft);
 }
 
+.btn.danger {
+  color: var(--error);
+  border-color: var(--error);
+}
+
 .btn.danger:hover {
   background: var(--error);
   border-color: var(--error);
@@ -2009,6 +2014,224 @@ mark {
   display: flex;
   justify-content: flex-end;
   margin-top: 1rem;
+}
+
+.toast-stack {
+  position: fixed;
+  bottom: 1.2rem;
+  right: 1.2rem;
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  pointer-events: none;
+}
+
+.toast {
+  max-width: 320px;
+  padding: 0.6rem 0.9rem;
+  border-radius: var(--radius);
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-pop);
+  font-size: 0.85rem;
+  color: var(--text);
+  animation: toast-in 0.18s ease-out;
+}
+
+.toast.success {
+  border-color: var(--notice);
+}
+
+.toast.error {
+  border-color: var(--error);
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.offline-banner {
+  position: relative;
+  z-index: 20;
+  padding: 0.45rem 1rem;
+  background: var(--error);
+  color: #fff;
+  font-size: 0.8rem;
+  text-align: center;
+  flex: none;
+}
+
+.confirm-dialog {
+  max-width: 380px;
+  text-align: center;
+}
+
+.confirm-dialog .confirm-icon {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 0.8rem;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--error);
+}
+
+.confirm-dialog .confirm-message {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.confirm-actions {
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.settings-modal {
+  max-width: 480px;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.settings-section {
+  margin-bottom: 1.2rem;
+}
+
+.settings-head {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-faint);
+  margin-bottom: 0.45rem;
+}
+
+.settings-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.4rem 0;
+  font-size: 0.88rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.settings-label {
+  color: var(--text-muted);
+}
+
+.settings-value {
+  color: var(--text);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.settings-note {
+  margin: 0 0 0.55rem;
+  font-size: 0.84rem;
+  line-height: 1.55;
+  color: var(--text-muted);
+}
+
+.settings-note.warn {
+  color: var(--error);
+}
+
+.settings-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-top: 0.4rem;
+}
+
+.note-list-skeleton {
+  display: flex;
+  flex-direction: column;
+  padding: 0.4rem;
+  gap: 0.4rem;
+}
+
+.skeleton-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding: 0.7rem 0.6rem;
+  border-radius: var(--radius-sm);
+}
+
+.skeleton-line {
+  height: 0.7rem;
+  border-radius: 4px;
+  background: linear-gradient(
+    90deg,
+    var(--bg-subtle) 25%,
+    var(--surface) 50%,
+    var(--bg-subtle) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+}
+
+.skeleton-line.w60 {
+  width: 60%;
+}
+
+.skeleton-line.w90 {
+  width: 90%;
+}
+
+.skeleton-line.w40 {
+  width: 40%;
+}
+
+@keyframes shimmer {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}
+
+.new-note-option-row {
+  display: flex;
+  align-items: center;
+  gap: 0.15rem;
+}
+
+.new-note-option-row .new-note-option {
+  flex: 1;
+}
+
+.new-note-option-del {
+  display: grid;
+  place-items: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  flex-shrink: 0;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-faint);
+  cursor: pointer;
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.new-note-option-del:hover {
+  background: var(--bg-subtle);
+  color: var(--error);
 }
 
 /* ============ Responsive ============ */

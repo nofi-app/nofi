@@ -2,7 +2,8 @@ import { useEffect } from 'react'
 
 const SHORTCUTS: { keys: string[]; label: string }[] = [
   { keys: ['Cmd/Ctrl', 'N'], label: 'New note' },
-  { keys: ['Cmd/Ctrl', 'F'], label: 'Focus search' },
+  { keys: ['Cmd/Ctrl', 'F'], label: 'Search notes' },
+  { keys: ['Cmd/Ctrl', 'F'], label: 'Find in note (while editing)' },
   { keys: ['Cmd/Ctrl', 'E'], label: 'Toggle theme' },
   { keys: ['Cmd/Ctrl', 'Shift', 'L'], label: 'Lock vault' },
   { keys: ['?'], label: 'Show this help' },

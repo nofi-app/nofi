@@ -69,7 +69,7 @@ export function NoteList({
   selectedId,
   onSelect,
 }: NoteListProps) {
-  const { items } = useItems()
+  const { items, loading } = useItems()
 
   const { notes, tagNames } = useMemo(() => {
     const all = items.filter(isNote)
@@ -152,7 +152,20 @@ export function NoteList({
       </div>
 
       <div className="note-list">
-        {notes.map((n) => (
+        {loading && notes.length === 0 ? (
+          <div className="note-list-skeleton" aria-hidden="true">
+            {[0, 1, 2, 3, 4].map((i) => (
+              <div key={i} className="skeleton-item">
+                <span className="skeleton-line w60" />
+                <span className="skeleton-line w90" />
+                <span className="skeleton-line w40" />
+              </div>
+            ))}
+          </div>
+        ) : notes.length === 0 ? (
+          <div className="note-list-empty">No notes here</div>
+        ) : (
+          notes.map((n) => (
           <button
             key={n.id}
             type="button"
@@ -191,9 +204,7 @@ export function NoteList({
               <span>{relativeTime(n.updatedAt)}</span>
             </span>
           </button>
-        ))}
-        {notes.length === 0 && (
-          <div className="note-list-empty">No notes here</div>
+          ))
         )}
       </div>
     </div>

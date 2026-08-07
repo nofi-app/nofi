@@ -10,6 +10,7 @@ export function ItemsProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth()
   const { status, masterKey } = useVault()
   const [items, setItems] = useState<Item[]>([])
+  const [loading, setLoading] = useState(true)
 
   const pull = useCallback(async () => {
     if (!user || !masterKey) return
@@ -25,7 +26,8 @@ export function ItemsProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (status === 'unlocked') {
-      void pull()
+      setLoading(true)
+      void pull().finally(() => setLoading(false))
     }
   }, [status, pull])
 
@@ -70,7 +72,7 @@ export function ItemsProvider({ children }: { children: ReactNode }) {
 
   return (
     <ItemsContext.Provider
-      value={{ items, addItem, updateItem, trashItem, removeItem }}
+      value={{ items, loading, addItem, updateItem, trashItem, removeItem }}
     >
       {children}
     </ItemsContext.Provider>

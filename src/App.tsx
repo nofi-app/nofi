@@ -6,6 +6,7 @@ import { ItemsProvider } from './lib/items-store'
 import { AuthScreen } from './components/AuthScreen'
 import { VaultScreen } from './components/VaultScreen'
 import { NotesApp } from './components/NotesApp'
+import { ToastProvider } from './components/Toasts'
 import './App.css'
 
 function SignedIn() {
@@ -34,7 +35,9 @@ function App() {
     <AuthProvider>
       <VaultProvider>
         <ItemsProvider>
-          <Gate />
+          <ToastProvider>
+            <Gate />
+          </ToastProvider>
         </ItemsProvider>
       </VaultProvider>
     </AuthProvider>
