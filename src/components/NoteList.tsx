@@ -1,10 +1,15 @@
-import { useMemo } from 'react'
+import { useCallback, useMemo, useRef, useState } from 'react'
 import type { Filter, NoteItem } from '../lib/types'
 import { isNote } from '../lib/notes'
 import { useItems } from '../lib/items-context'
 import { PinIcon, TagIcon } from './icons'
 
 export type SortMode = 'updated' | 'created' | 'title'
+
+// Estimate for an average note row. The list virtualizes so we never render
+// thousands of DOM nodes at once; rows are measured on the fly for accuracy.
+const ROW_ESTIMATE = 88
+const OVERSCAN = 12
 
 interface NoteListProps {
   filter: Filter
@@ -70,6 +75,24 @@ export function NoteList({
   onSelect,
 }: NoteListProps) {
   const { items, loading } = useItems()
+  const scrollRef = useRef<HTMLDivElement | null>(null)
+  const roRef = useRef<ResizeObserver | null>(null)
+  const [scrollTop, setScrollTop] = useState(0)
+  const [viewportH, setViewportH] = useState(0)
+  const heightsRef = useRef<Map<string, number>>(new Map())
+  const onScroll = useCallback(() => {
+    const el = scrollRef.current
+    if (el) setScrollTop(el.scrollTop)
+  }, [])
+  const onRef = useCallback((el: HTMLDivElement | null) => {
+    scrollRef.current = el
+    if (el) {
+      setViewportH(el.clientHeight)
+      roRef.current?.disconnect()
+      roRef.current = new ResizeObserver(() => setViewportH(el.clientHeight))
+      roRef.current.observe(el)
+    }
+  }, [])
 
   const { notes, tagNames } = useMemo(() => {
     const all = items.filter(isNote)
@@ -130,6 +153,52 @@ export function NoteList({
 
   const q = search.trim()
 
+  const [rerender, setRerender] = useState(0)
+
+  const measuredRow = useCallback(
+    (id: string) => heightsRef.current.get(id) ?? ROW_ESTIMATE,
+    [],
+  )
+  const offsets = useMemo(() => {
+    const arr: number[] = []
+    let acc = 0
+    for (const n of notes) {
+      arr.push(acc)
+      acc += measuredRow(n.id)
+    }
+    return arr
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [notes, rerender])
+
+  const totalH = useMemo(
+    () => notes.reduce((acc, n) => acc + measuredRow(n.id), 0),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [notes, offsets],
+  )
+
+  const start = Math.max(
+    0,
+    Math.floor(scrollTop / ROW_ESTIMATE) - OVERSCAN,
+  )
+  const end = Math.min(
+    notes.length,
+    Math.ceil((scrollTop + viewportH) / ROW_ESTIMATE) + OVERSCAN,
+  )
+
+  function recordHeight(id: string, el: HTMLButtonElement | null) {
+    if (!el) return
+    const h = el.getBoundingClientRect().height
+    if (Math.abs(h - (heightsRef.current.get(id) ?? ROW_ESTIMATE)) > 2) {
+      heightsRef.current.set(id, h)
+      setRerender((x) => x + 1)
+    }
+  }
+
+  const visible = notes.slice(start, end)
+  const padTop = start > 0 ? offsets[start] : 0
+  const visibleH = visible.reduce((acc, n) => acc + measuredRow(n.id), 0)
+  const padBottom = Math.max(0, totalH - padTop - visibleH)
+
   return (
     <div className="note-list-pane">
       <div className="list-header">
@@ -151,7 +220,11 @@ export function NoteList({
         </select>
       </div>
 
-      <div className="note-list">
+      <div
+        className="note-list"
+        ref={onRef}
+        onScroll={onScroll}
+      >
         {loading && notes.length === 0 ? (
           <div className="note-list-skeleton" aria-hidden="true">
             {[0, 1, 2, 3, 4].map((i) => (
@@ -165,46 +238,55 @@ export function NoteList({
         ) : notes.length === 0 ? (
           <div className="note-list-empty">No notes here</div>
         ) : (
-          notes.map((n) => (
-          <button
-            key={n.id}
-            type="button"
-            className={`note-list-item${n.id === selectedId ? ' selected' : ''}`}
-            onClick={() => onSelect(n.id)}
-          >
-            <span className="note-list-title">
-              {n.pinned && (
-                <span className="pin-mark" aria-label="Pinned">
-                  <PinIcon size={13} />
+          <>
+            {padTop > 0 && (
+              <div style={{ height: padTop }} aria-hidden="true" />
+            )}
+            {visible.map((n) => (
+            <button
+              key={n.id}
+              ref={(el) => recordHeight(n.id, el)}
+              type="button"
+              className={`note-list-item${n.id === selectedId ? ' selected' : ''}`}
+              onClick={() => onSelect(n.id)}
+            >
+              <span className="note-list-title">
+                {n.pinned && (
+                  <span className="pin-mark" aria-label="Pinned">
+                    <PinIcon size={13} />
+                  </span>
+                )}
+                {highlight(n.title || 'Untitled', q)}
+              </span>
+              {!n.trashed && (
+                <span className="note-list-snippet">{snippet(n, q)}</span>
+              )}
+              {n.tags.length > 0 && (
+                <span className="note-list-tags">
+                  {n.tags.slice(0, 2).map((id) => {
+                    const name = tagNames.get(id)
+                    if (!name) return null
+                    return (
+                      <span key={id} className="list-tag">
+                        <TagIcon size={11} />
+                        {name}
+                      </span>
+                    )
+                  })}
                 </span>
               )}
-              {highlight(n.title || 'Untitled', q)}
-            </span>
-            {!n.trashed && (
-              <span className="note-list-snippet">{snippet(n, q)}</span>
-            )}
-            {n.tags.length > 0 && (
-              <span className="note-list-tags">
-                {n.tags.slice(0, 2).map((id) => {
-                  const name = tagNames.get(id)
-                  if (!name) return null
-                  return (
-                    <span key={id} className="list-tag">
-                      <TagIcon size={11} />
-                      {name}
-                    </span>
-                  )
-                })}
+              <span className="note-list-meta">
+                {n.locked && <span>Locked</span>}
+                {n.archived && <span>Archived</span>}
+                {n.trashed && <span>Trash</span>}
+                <span>{relativeTime(n.updatedAt)}</span>
               </span>
+            </button>
+            ))}
+            {padBottom > 0 && (
+              <div style={{ height: padBottom }} aria-hidden="true" />
             )}
-            <span className="note-list-meta">
-              {n.locked && <span>Locked</span>}
-              {n.archived && <span>Archived</span>}
-              {n.trashed && <span>Trash</span>}
-              <span>{relativeTime(n.updatedAt)}</span>
-            </span>
-          </button>
-          ))
+          </>
         )}
       </div>
     </div>

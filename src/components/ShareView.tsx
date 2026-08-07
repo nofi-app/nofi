@@ -27,18 +27,32 @@ function RenderChecklist({ text }: { text: string }) {
   )
 }
 
+function fileDataUrl(file: { mimeType: string; data: string }): string {
+  return `data:${file.mimeType};base64,${file.data}`
+}
+
 function RenderBody({ payload }: { payload: SharePayload }) {
+  const fileMap = useMemo(() => {
+    const map = new Map<string, { mimeType: string; data: string }>()
+    for (const f of payload.files ?? []) map.set(f.id, f)
+    return map
+  }, [payload.files])
+
   const html = useMemo(() => {
+    let rendered = ''
     if (payload.editor === 'markdown') {
-      const rendered = marked.parse(payload.text, {
-        gfm: true,
-        breaks: true,
-      }) as string
-      return DOMPurify.sanitize(rendered)
+      rendered = marked.parse(payload.text, { gfm: true, breaks: true }) as string
+    } else if (payload.editor === 'rich') {
+      rendered = payload.text
+    } else {
+      return ''
     }
-    if (payload.editor === 'rich') return DOMPurify.sanitize(payload.text)
-    return ''
-  }, [payload])
+    rendered = rendered.replace(/nofi:\/\/file\/([0-9a-f-]+)/g, (_m, id: string) => {
+      const f = fileMap.get(id)
+      return f ? fileDataUrl(f) : _m
+    })
+    return DOMPurify.sanitize(rendered)
+  }, [payload, fileMap])
 
   if (payload.editor === 'markdown' || payload.editor === 'rich') {
     return (

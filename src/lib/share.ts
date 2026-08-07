@@ -1,5 +1,6 @@
 import { supabase } from './supabase'
-import type { NoteEditorType, NoteItem } from './types'
+import type { FileItem, NoteEditorType, NoteItem } from './types'
+import { downloadAttachment } from './files'
 import {
   decryptString,
   encryptString,
@@ -7,12 +8,20 @@ import {
   wrapItemKey,
 } from './crypto'
 
+export interface SharedFile {
+  id: string
+  name: string
+  mimeType: string
+  data: string
+}
+
 export interface SharePayload {
   title: string
   editor: NoteEditorType
   text: string
   tags: string[]
   updatedAt: number
+  files?: SharedFile[]
 }
 
 export interface ShareRow {
@@ -36,14 +45,44 @@ function fromBase64Url(b64u: string): Uint8Array<ArrayBuffer> {
   return bytes
 }
 
-function buildPayload(note: NoteItem): SharePayload {
+function bytesToBase64(bytes: Uint8Array): string {
+  let bin = ''
+  for (const byte of bytes) bin += String.fromCharCode(byte)
+  return btoa(bin)
+}
+
+async function fileToSharedFile(
+  masterKey: CryptoKey,
+  file: FileItem,
+): Promise<SharedFile> {
+  const blob = await downloadAttachment(masterKey, file)
+  const bytes = new Uint8Array(await blob.arrayBuffer())
   return {
+    id: file.id,
+    name: file.name,
+    mimeType: file.mimeType,
+    data: bytesToBase64(bytes),
+  }
+}
+
+async function buildPayload(
+  note: NoteItem,
+  masterKey: CryptoKey,
+  files: FileItem[],
+): Promise<SharePayload> {
+  const payload: SharePayload = {
     title: note.title,
     editor: note.editor,
     text: note.text,
     tags: note.tags,
     updatedAt: note.updatedAt,
   }
+  if (files.length > 0) {
+    payload.files = await Promise.all(
+      files.map((f) => fileToSharedFile(masterKey, f)),
+    )
+  }
+  return payload
 }
 
 export function buildShareLink(token: string, keyB64: string, origin?: string): string {
@@ -64,13 +103,14 @@ export function parseShareUrl(
 export async function createShare(
   note: NoteItem,
   masterKey: CryptoKey,
+  files: FileItem[] = [],
 ): Promise<string> {
   const shareKey = await crypto.subtle.generateKey(
     { name: 'AES-GCM', length: 256 },
     true,
     ['encrypt', 'decrypt'],
   )
-  const payload = buildPayload(note)
+  const payload = await buildPayload(note, masterKey, files)
   const encrypted = await encryptString(shareKey, JSON.stringify(payload))
   const wrapped = await wrapItemKey(masterKey, shareKey)
   const token = crypto.randomUUID().replace(/-/g, '')

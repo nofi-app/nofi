@@ -1,8 +1,9 @@
-import { useCallback, useEffect, useState } from 'react'
-import type { NoteItem } from '../lib/types'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import type { FileItem, NoteItem } from '../lib/types'
 import { createShare, listShares, revokeShare, type ShareRow } from '../lib/share'
 import { useToasts } from '../lib/toast-context'
 import { useVault } from '../lib/vault-context'
+import { useItems } from '../lib/items-context'
 import { CopyIcon, LinkIcon, XIcon } from './icons'
 
 interface ShareDialogProps {
@@ -13,9 +14,18 @@ interface ShareDialogProps {
 export function ShareDialog({ note, onClose }: ShareDialogProps) {
   const { masterKey } = useVault()
   const { push } = useToasts()
+  const { items } = useItems()
   const [shares, setShares] = useState<ShareRow[]>([])
   const [busy, setBusy] = useState(false)
   const [freshLink, setFreshLink] = useState<string | null>(null)
+
+  const noteFiles = useMemo(
+    () =>
+      items.filter(
+        (i): i is FileItem => i.type === 'file' && i.noteId === note.id,
+      ),
+    [items, note.id],
+  )
 
   const load = useCallback(async () => {
     if (!masterKey) return
@@ -42,7 +52,7 @@ export function ShareDialog({ note, onClose }: ShareDialogProps) {
     if (!masterKey) return
     setBusy(true)
     try {
-      const link = await createShare(note, masterKey)
+      const link = await createShare(note, masterKey, noteFiles)
       await navigator.clipboard.writeText(link).catch(() => {})
       setFreshLink(link)
       await load()
@@ -87,10 +97,17 @@ export function ShareDialog({ note, onClose }: ShareDialogProps) {
         </div>
 
         <p className="settings-note">
-          Anyone with the link can view the note. The content is encrypted
-          end-to-end — the decryption key lives only in the link, never on the
-          server. Links stay active until you revoke them.
+          Anyone with the link can view the note and its attached files. The
+          content is encrypted end-to-end — the decryption key lives only in the
+          link, never on the server. Links stay active until you revoke them.
         </p>
+
+        {noteFiles.length > 0 && (
+          <p className="settings-note">
+            {noteFiles.length} attachment{noteFiles.length === 1 ? '' : 's'} will
+            be included in the share.
+          </p>
+        )}
 
         {freshLink && (
           <div className="share-fresh">
