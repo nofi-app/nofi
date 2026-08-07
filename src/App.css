@@ -1079,6 +1079,130 @@ button {
   font-size: 0.9rem;
 }
 
+/* Checklist editor */
+.checklist {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1.2rem 1.4rem;
+}
+
+.check-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.check-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 0.15rem 0;
+}
+
+.check-box {
+  flex: none;
+  width: 1.35rem;
+  height: 1.35rem;
+  margin-top: 0.25rem;
+  display: grid;
+  place-items: center;
+  border: 1.5px solid var(--border-strong);
+  border-radius: 5px;
+  background: var(--surface);
+  color: var(--accent);
+  cursor: pointer;
+}
+
+.check-box:hover {
+  border-color: var(--accent);
+}
+
+.check-bullet {
+  flex: none;
+  width: 1.35rem;
+  text-align: center;
+  margin-top: 0.3rem;
+  color: var(--text-muted);
+}
+
+.check-text {
+  flex: 1;
+  border: none;
+  background: transparent;
+  color: var(--text);
+  font-size: 0.95rem;
+  line-height: 1.7;
+  padding: 0.2rem 0;
+  resize: none;
+  overflow: hidden;
+}
+
+.check-text:focus {
+  outline: none;
+}
+
+.check-item.done .check-text {
+  color: var(--text-muted);
+  text-decoration: line-through;
+}
+
+.check-moves {
+  flex: none;
+  display: none;
+  gap: 0.1rem;
+  padding-top: 0.2rem;
+}
+
+.check-item:hover .check-moves {
+  display: inline-flex;
+}
+
+.check-move {
+  display: grid;
+  place-items: center;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 0.1rem;
+  border-radius: 4px;
+}
+
+.check-move:hover:not(:disabled) {
+  background: var(--bg-muted);
+  color: var(--text);
+}
+
+.check-move:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.check-add {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin-top: 0.6rem;
+  padding: 0.3rem 0.6rem;
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.check-add:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.check-hint {
+  margin: 0.6rem 0 0;
+  font-size: 0.75rem;
+  color: var(--text-faint);
+}
+
 .editor-loading {
   flex: 1;
   display: grid;

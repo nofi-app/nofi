@@ -14,6 +14,7 @@ import {
   TrashIcon,
 } from './icons'
 import { TextEditor } from './editors/TextEditor'
+import { ChecklistEditor } from './editors/ChecklistEditor'
 import { FileAttachments } from './FileAttachments'
 import { RevisionHistory } from './RevisionHistory'
 
@@ -165,6 +166,13 @@ export function NoteEditor({
             case 'code':
               return (
                 <CodeEditor value={text} onChange={(v) => edit({ text: v })} />
+              )
+            case 'checklist':
+              return (
+                <ChecklistEditor
+                  value={text}
+                  onChange={(v) => edit({ text: v })}
+                />
               )
             default:
               return (
