@@ -7,6 +7,7 @@ import {
   Eye,
   Folder,
   History,
+  Link,
   Lock,
   Moon,
   NotepadText,
@@ -46,4 +47,5 @@ export const CheckIcon = (p: IconProps) => <Check {...p} />
 export const AlertIcon = (p: IconProps) => <AlertCircle {...p} />
 export const RestoreIcon = (p: IconProps) => <RotateCcw {...p} />
 export const ChevronIcon = (p: IconProps) => <ChevronDown {...p} />
+export const LinkIcon = (p: IconProps) => <Link {...p} />
 

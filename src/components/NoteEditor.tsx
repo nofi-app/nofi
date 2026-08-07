@@ -1,4 +1,4 @@
-import { Suspense, lazy, useCallback, useEffect, useState } from 'react'
+import { Suspense, lazy, useCallback, useEffect, useMemo, useState } from 'react'
 import type {
   FileItem,
   FolderItem,
@@ -6,17 +6,19 @@ import type {
   NoteItem,
   TagItem,
 } from '../lib/types'
-import { editorLabel } from '../lib/notes'
+import { editorLabel, isNote } from '../lib/notes'
 import { folderPath } from '../lib/folders'
 import { useVault } from '../lib/vault-context'
 import { useItems } from '../lib/items-context'
 import { uploadAttachment } from '../lib/files'
 import { resolveImagesIn } from '../lib/inline-images'
+import { findBacklinks, noteRefs } from '../lib/note-links'
 import {
   AlertIcon,
   ArchiveIcon,
   CheckIcon,
   HistoryIcon,
+  LinkIcon,
   LockIcon,
   PinIcon,
   RestoreIcon,
@@ -67,6 +69,7 @@ interface NoteEditorProps {
   onDeleteForever: (id: string) => void
   onAddTag: (name: string) => Promise<string | null>
   onSaveTemplate: (note: NoteItem) => void
+  onOpenNote: (id: string) => void
 }
 
 export function NoteEditor({
@@ -81,6 +84,7 @@ export function NoteEditor({
   onDeleteForever,
   onAddTag,
   onSaveTemplate,
+  onOpenNote,
 }: NoteEditorProps) {
   const { unlock, masterKey } = useVault()
   const { items, addItem } = useItems()
@@ -94,6 +98,16 @@ export function NoteEditor({
   const [unlockError, setUnlockError] = useState<string | null>(null)
   const [unlockBusy, setUnlockBusy] = useState(false)
   const [templateSaved, setTemplateSaved] = useState(false)
+  const [showBacklinks, setShowBacklinks] = useState(false)
+
+  const noteRefList = useMemo(
+    () => noteRefs(items.filter(isNote)),
+    [items],
+  )
+  const backlinks = useMemo(
+    () => findBacklinks(items.filter(isNote), { id: draft.id, title: draft.title.trim() }),
+    [items, draft.id, draft.title],
+  )
 
   useEffect(() => {
     setDraft(note)
@@ -203,6 +217,9 @@ export function NoteEditor({
                   onChange={(v) => edit({ text: v })}
                   insertImage={insertImage}
                   resolveImages={resolveImages}
+                  notes={noteRefList}
+                  excludeId={draft.id}
+                  onOpenNote={onOpenNote}
                 />
               )
             case 'rich':
@@ -212,6 +229,8 @@ export function NoteEditor({
                   onChange={(v) => edit({ text: v })}
                   insertImage={insertImage}
                   resolveImages={resolveImages}
+                  notes={noteRefList}
+                  excludeId={draft.id}
                 />
               )
             case 'code':
@@ -321,6 +340,16 @@ export function NoteEditor({
               <SparkIcon size={15} />
             </button>
           )}
+          {!draft.trashed && (
+            <button
+              type="button"
+              className={`toolbar-btn${showBacklinks ? ' active' : ''}`}
+              onClick={() => setShowBacklinks((s) => !s)}
+              title={showBacklinks ? 'Hide backlinks' : 'Show backlinks'}
+            >
+              <LinkIcon size={15} />
+            </button>
+          )}
           {templateSaved && <span className="template-saved">Template saved</span>}
           {!draft.trashed && (
             <button
@@ -421,6 +450,39 @@ export function NoteEditor({
       </div>
 
       {!draft.trashed && !draft.locked && <FileAttachments noteId={draft.id} />}
+
+      {!draft.trashed && showBacklinks && (
+        <div className="backlinks-panel">
+          <div className="backlinks-head">
+            <LinkIcon size={13} />
+            Backlinks
+            {backlinks.length > 0 && (
+              <span className="count">{backlinks.length}</span>
+            )}
+          </div>
+          {backlinks.length === 0 ? (
+            <p className="backlinks-empty">
+              No other notes link to this one. Type{' '}
+              <code>[[</code> in a note to link it here.
+            </p>
+          ) : (
+            <ul className="backlinks-list">
+              {backlinks.map((n) => (
+                <li key={n.id}>
+                  <button
+                    type="button"
+                    className="backlink-btn"
+                    onClick={() => onOpenNote(n.id)}
+                  >
+                    <span className="backlink-title">{n.title || 'Untitled'}</span>
+                    <span className="backlink-snippet">{n.text.slice(0, 80)}</span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
 
       {showHistory && (
         <RevisionHistory

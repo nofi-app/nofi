@@ -462,6 +462,7 @@ export function NotesApp() {
               onDeleteForever={deleteForever}
               onAddTag={addTag}
               onSaveTemplate={saveTemplateFrom}
+              onOpenNote={setSelectedId}
             />
           ) : (
             <div className="editor-empty">

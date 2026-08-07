@@ -23,12 +23,20 @@ import {
   Underline as UnderlineIcon,
 } from 'lucide-react'
 import { fileRefUrl } from '../../lib/inline-images'
+import {
+  detectLinkSuggest,
+  filterSuggestions,
+  type NoteLinkSuggest,
+} from '../../lib/note-links'
+import { NoteLinkPopup } from '../NoteLinkPopup'
 
 interface RichTextEditorProps {
   value: string
   onChange: (value: string) => void
   insertImage?: (file: File) => Promise<string | null>
   resolveImages?: (container: HTMLElement | null) => void
+  notes?: { id: string; title: string }[]
+  excludeId?: string
 }
 
 type EditorInstance = NonNullable<ReturnType<typeof useEditor>>
@@ -65,10 +73,100 @@ export function RichTextEditor({
   onChange,
   insertImage,
   resolveImages,
+  notes,
+  excludeId,
 }: RichTextEditorProps) {
   const [linkOpen, setLinkOpen] = useState(false)
   const [linkUrl, setLinkUrl] = useState('')
+  const [suggest, setSuggest] = useState<NoteLinkSuggest>({
+    open: false,
+    query: '',
+  })
+  const [suggestIndex, setSuggestIndex] = useState(0)
+  const [suggestPos, setSuggestPos] = useState<{ top: number; left: number } | null>(null)
   const editorRef: EditorRef = useRef<EditorInstance | null>(null)
+
+  const options = filterSuggestions(notes ?? [], suggest.query, excludeId ?? '')
+
+  const live = useRef({
+    suggest,
+    suggestIndex,
+    options,
+    notes,
+    excludeId,
+  })
+  live.current = { suggest, suggestIndex, options, notes, excludeId }
+
+  function checkSuggest(editor: EditorInstance) {
+    const { from } = editor.state.selection
+    const before = editor.state.doc.textBetween(
+      Math.max(0, from - 60),
+      from,
+      '\n',
+    )
+    const after = editor.state.doc.textBetween(
+      from,
+      Math.min(editor.state.doc.content.size, from + 60),
+      '\n',
+    )
+    const det = detectLinkSuggest(before, after)
+    if (det.open) {
+      const coords = editor.view.coordsAtPos(from)
+      setSuggestPos({ top: coords.bottom + 6, left: coords.left })
+      setSuggest({ open: true, query: det.query })
+      setSuggestIndex(0)
+    } else {
+      setSuggest((s) => (s.open ? { open: false, query: '' } : s))
+    }
+  }
+
+  function insertSuggestion(editor: EditorInstance, opt: { id: string; title: string }) {
+    const { from } = editor.state.selection
+    const before = editor.state.doc.textBetween(
+      Math.max(0, from - 60),
+      from,
+      '\n',
+    )
+    const start = before.lastIndexOf('[[')
+    if (start === -1) return
+    const abs = from - before.length + start
+    editor
+      .chain()
+      .focus()
+      .insertContentAt({ from: abs, to: from }, `[[${opt.title}]]`)
+      .run()
+    setSuggest({ open: false, query: '' })
+  }
+
+  function handleKeyDown(
+    editor: EditorInstance,
+    e: KeyboardEvent,
+  ): boolean {
+    const cur = live.current
+    if (!cur.suggest.open) return false
+    if (e.key === 'ArrowDown') {
+      e.preventDefault()
+      setSuggestIndex((i) => Math.min(i + 1, cur.options.length - 1))
+      return true
+    }
+    if (e.key === 'ArrowUp') {
+      e.preventDefault()
+      setSuggestIndex((i) => Math.max(i - 1, 0))
+      return true
+    }
+    if (e.key === 'Enter' || e.key === 'Tab') {
+      e.preventDefault()
+      const opt = cur.options[cur.suggestIndex]
+      if (opt) insertSuggestion(editor, opt)
+      return true
+    }
+    if (e.key === 'Escape') {
+      e.preventDefault()
+      setSuggest({ open: false, query: '' })
+      return true
+    }
+    return false
+  }
 
   const editor = useEditor({
     extensions: [
@@ -82,13 +180,19 @@ export function RichTextEditor({
       Image.configure({ inline: true }),
     ],
     content: value,
-    onUpdate: ({ editor }) => onChange(editor.getHTML()),
+    onUpdate: ({ editor }) => {
+      onChange(editor.getHTML())
+      checkSuggest(editor)
+    },
+    onSelectionUpdate: ({ editor }) => checkSuggest(editor),
     editorProps: {
       attributes: { class: 'note-editor-rich' },
       handlePaste: (_view, event) =>
         handleImageTransfer(event.clipboardData, editorRef, insertImage),
       handleDrop: (_view, event) =>
         handleImageTransfer(event.dataTransfer, editorRef, insertImage),
+      handleKeyDown: (_view, event) =>
+        editorRef.current ? handleKeyDown(editorRef.current, event) : false,
     },
   })
   editorRef.current = editor
@@ -308,6 +412,22 @@ export function RichTextEditor({
       )}
 
       <EditorContent editor={editor} />
+
+      <NoteLinkPopup
+        open={suggest.open}
+        options={options}
+        index={suggestIndex}
+        onPick={(opt) => insertSuggestion(editor, opt)}
+        style={
+          suggestPos
+            ? {
+                position: 'fixed',
+                top: suggestPos.top,
+                left: suggestPos.left,
+              }
+            : undefined
+        }
+      />
     </div>
   )
 }
