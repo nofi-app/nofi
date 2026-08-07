@@ -66,4 +66,46 @@ describe('parseImport', () => {
     const child = data.folders.find((f) => f.name === 'Child')!
     expect(child.parentId).toBe(root.id)
   })
+
+  it('carries over file entries and maps note ids', () => {
+    const text = JSON.stringify({
+      app: 'nofi',
+      version: 2,
+      notes: [
+        {
+          id: 'note-1',
+          type: 'note',
+          title: 'With image',
+          text: '![pic](nofi://file/file-1)',
+          editor: 'plain',
+          tags: [],
+          folderId: null,
+          pinned: false,
+          archived: false,
+          trashed: false,
+          deleted: false,
+          createdAt: 1,
+          updatedAt: 1,
+        },
+      ],
+      tags: [],
+      folders: [],
+      files: [
+        {
+          id: 'file-1',
+          name: 'pic.png',
+          mimeType: 'image/png',
+          size: 10,
+          noteId: 'note-1',
+          data: 'aGVsbG8=',
+        },
+      ],
+    })
+
+    const data = parseImport(text)
+    expect(data.files).toHaveLength(1)
+    expect(data.files[0].data).toBe('aGVsbG8=')
+    expect(data.files[0].noteId).toBe('note-1')
+    expect(data.noteIdMap.get('note-1')).toBe(data.notes[0].id)
+  })
 })

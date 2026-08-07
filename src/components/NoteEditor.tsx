@@ -123,7 +123,7 @@ export function NoteEditor({
     function onKey(e: KeyboardEvent) {
       if (!(e.metaKey || e.ctrlKey) || e.key.toLowerCase() !== 'f') return
       if (draft.trashed || draft.locked) return
-      if (draft.editor === 'code' || draft.editor === 'checklist') return
+      if (draft.editor === 'code') return
       e.preventDefault()
       setFindOpen(true)
     }
@@ -261,6 +261,8 @@ export function NoteEditor({
                 <ChecklistEditor
                   value={text}
                   onChange={(v) => edit({ text: v })}
+                  findOpen={findOpen}
+                  onFindClose={() => setFindOpen(false)}
                 />
               )
             default:

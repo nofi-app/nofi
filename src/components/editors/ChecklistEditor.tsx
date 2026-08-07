@@ -1,17 +1,30 @@
 import { useRef } from 'react'
 import { Check, ChevronDown, ChevronUp, Plus } from 'lucide-react'
+import { FindBar } from '../FindBar'
 
 interface ChecklistEditorProps {
   value: string
   onChange: (value: string) => void
+  findOpen?: boolean
+  onFindClose?: () => void
 }
 
 const TASK_RE = /^(\s*)[-*+]\s+\[([ xX])\]\s*(.*)$/
 
-export function ChecklistEditor({ value, onChange }: ChecklistEditorProps) {
+export function ChecklistEditor({ value, onChange, findOpen, onFindClose }: ChecklistEditorProps) {
   const refs = useRef<(HTMLTextAreaElement | null)[]>([])
 
   const lines = value.split('\n')
+
+  function applyFind(from: number, to: number) {
+    const before = value.slice(0, from)
+    const lineIdx = before.split('\n').length - 1
+    const lineStart = before.lastIndexOf('\n') + 1
+    const el = refs.current[lineIdx]
+    if (!el) return
+    el.setSelectionRange(from - lineStart, to - lineStart)
+    el.focus()
+  }
 
   function setLine(i: number, next: string) {
     const copy = lines.slice()
@@ -149,6 +162,9 @@ export function ChecklistEditor({ value, onChange }: ChecklistEditorProps) {
 
   return (
     <div className="checklist">
+      {findOpen && onFindClose && (
+        <FindBar value={value} onMatch={applyFind} onClose={onFindClose} />
+      )}
       <ul className="check-list">{lines.map((_, i) => renderRow(i))}</ul>
       <button type="button" className="check-add" onClick={append}>
         <Plus size={13} />

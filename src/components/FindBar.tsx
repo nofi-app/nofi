@@ -7,6 +7,7 @@ interface FindBarProps {
   value: string
   textareaRef?: React.RefObject<HTMLTextAreaElement | null>
   editor?: Editor | null
+  onMatch?: (from: number, to: number, index: number) => void
   onClose: () => void
 }
 
@@ -40,7 +41,7 @@ function textOffsetToPos(doc: Node, target: number): number {
   return result
 }
 
-export function FindBar({ value, textareaRef, editor, onClose }: FindBarProps) {
+export function FindBar({ value, textareaRef, editor, onMatch, onClose }: FindBarProps) {
   const [query, setQuery] = useState('')
   const [current, setCurrent] = useState(0)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -51,6 +52,10 @@ export function FindBar({ value, textareaRef, editor, onClose }: FindBarProps) {
   applyRef.current = (idx: number) => {
     const m = matches[idx]
     if (!m) return
+    if (onMatch) {
+      onMatch(m[0], m[1], idx)
+      return
+    }
     const el = textareaRef?.current
     if (el) {
       el.setSelectionRange(m[0], m[1])

@@ -1,9 +1,11 @@
 import { useEffect, useMemo } from 'react'
 import type { Item } from '../lib/types'
 import { useAuth } from '../lib/auth-context'
+import { useVault } from '../lib/vault-context'
 import { exportJson, exportMarkdown } from '../lib/export'
 import { formatSize } from '../lib/files'
 import type { Theme } from '../lib/theme'
+import { useToasts } from '../lib/toast-context'
 import { DownloadIcon, MoonIcon, SunIcon } from './icons'
 
 interface SettingsModalProps {
@@ -20,6 +22,8 @@ export function SettingsModal({
   onClose,
 }: SettingsModalProps) {
   const { user, signOut } = useAuth()
+  const { masterKey } = useVault()
+  const { push } = useToasts()
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
@@ -33,6 +37,28 @@ export function SettingsModal({
     () => formatSize(JSON.stringify(items).length),
     [items],
   )
+
+  async function doExport(kind: 'json' | 'markdown') {
+    try {
+      if (kind === 'json') {
+        if (!masterKey) throw new Error('Vault not unlocked')
+        await exportJson(items, masterKey)
+      } else {
+        exportMarkdown(items)
+      }
+      push(
+        kind === 'json'
+          ? 'Export ready (includes images)'
+          : 'Export ready (text only)',
+        'success',
+      )
+    } catch (err) {
+      push(
+        err instanceof Error ? err.message : 'Export failed',
+        'error',
+      )
+    }
+  }
 
   return (
     <div className="modal-overlay" onClick={onClose}>
@@ -81,7 +107,8 @@ export function SettingsModal({
           <div className="settings-head">Emergency kit</div>
           <p className="settings-note">
             Your notes are encrypted before they ever leave your device. Only
-            your vault passphrase can unlock them — not even Nofi can.
+            your vault passphrase can unlock them — not even Nofi can. The full
+            backup includes your text, tags, folders, and image attachments.
           </p>
           <p className="settings-note warn">
             If you forget your passphrase, your notes can never be recovered.
@@ -91,7 +118,7 @@ export function SettingsModal({
             <button
               type="button"
               className="btn"
-              onClick={() => exportJson(items)}
+              onClick={() => void doExport('json')}
             >
               <DownloadIcon size={14} />
               Export all notes
@@ -99,7 +126,7 @@ export function SettingsModal({
             <button
               type="button"
               className="btn"
-              onClick={() => exportMarkdown(items)}
+              onClick={() => void doExport('markdown')}
             >
               <DownloadIcon size={14} />
               Export as Markdown

@@ -5,7 +5,7 @@ import { createNote, isNote } from '../lib/notes'
 import { createTag, isTag } from '../lib/tags'
 import { createFolder, isFolder } from '../lib/folders'
 import { saveRevision } from '../lib/revisions'
-import { exportJson, exportMarkdown, parseImport } from '../lib/export'
+import { exportJson, exportMarkdown, importFiles, parseImport } from '../lib/export'
 import { applyTheme, getTheme, setTheme, type Theme } from '../lib/theme'
 import {
   allTemplates,
@@ -244,14 +244,20 @@ export function NotesApp() {
 
   function handleExport(kind: 'json' | 'markdown') {
     const count = notes.filter((n) => !n.trashed).length
-    if (kind === 'json') exportJson(items)
-    else exportMarkdown(items)
-    push(
-      count === 1
-        ? 'Exported 1 note'
-        : `Exported ${count} notes`,
-      'success',
-    )
+    run(async () => {
+      if (kind === 'json') {
+        if (!masterKey) throw new Error('Vault not unlocked')
+        await exportJson(items, masterKey)
+      } else {
+        exportMarkdown(items)
+      }
+      push(
+        count === 1
+          ? 'Exported 1 note'
+          : `Exported ${count} notes`,
+        'success',
+      )
+    })
   }
 
   function addTag(name: string): Promise<string | null> {
@@ -272,6 +278,32 @@ export function NotesApp() {
       for (const folder of data.folders) await addItem(folder)
       for (const tag of data.tags) await addItem(tag)
       for (const note of data.notes) await addItem(note)
+
+      if (masterKey && data.files.length) {
+        const { fileItems, idMap } = await importFiles(
+          masterKey,
+          data.files,
+          data.noteIdMap,
+        )
+        for (const fi of fileItems) await addItem(fi)
+        if (idMap.size) {
+          for (const note of data.notes) {
+            let next = note.text
+            let changed = false
+            for (const [oldId, newId] of idMap) {
+              const ref = `nofi://file/${oldId}`
+              if (next.includes(ref)) {
+                next = next.split(ref).join(`nofi://file/${newId}`)
+                changed = true
+              }
+            }
+            if (changed) {
+              await updateItem({ ...note, text: next, updatedAt: Date.now() })
+            }
+          }
+        }
+      }
+
       setError(null)
       const count =
         data.notes.length + data.tags.length + data.folders.length
