@@ -1068,6 +1068,130 @@ button {
   margin: 0.7rem 0 0.35rem;
 }
 
+.note-rich-wrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.rich-toolbar {
+  flex: none;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.15rem;
+  padding: 0.4rem 0.6rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-muted);
+}
+
+.rich-btn {
+  display: grid;
+  place-items: center;
+  width: 1.8rem;
+  height: 1.8rem;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.rich-btn:hover:not(:disabled) {
+  background: var(--surface);
+  color: var(--text);
+}
+
+.rich-btn.active {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.rich-btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.rich-sep {
+  width: 1px;
+  height: 1.2rem;
+  margin: 0 0.25rem;
+  background: var(--border);
+}
+
+.rich-link-pop {
+  display: flex;
+  gap: 0.4rem;
+  padding: 0.4rem 0.6rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+}
+
+.rich-link-pop input {
+  flex: 1;
+  min-width: 0;
+  padding: 0.35rem 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 0.85rem;
+}
+
+.rich-link-pop input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.note-editor-rich a {
+  color: var(--accent);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.note-editor-rich ul,
+.note-editor-rich ol {
+  padding-left: 1.5rem;
+  margin: 0 0 0.6rem;
+}
+
+.note-editor-rich ul {
+  list-style: disc;
+}
+
+.note-editor-rich ol {
+  list-style: decimal;
+}
+
+.note-editor-rich blockquote {
+  margin: 0.5rem 0;
+  padding-left: 1rem;
+  border-left: 3px solid var(--border-strong);
+  color: var(--text-muted);
+}
+
+.note-editor-rich pre {
+  background: var(--bg-subtle);
+  padding: 0.7rem 0.9rem;
+  border-radius: var(--radius-sm);
+  overflow-x: auto;
+  margin: 0 0 0.6rem;
+}
+
+.note-editor-rich code {
+  background: var(--bg-subtle);
+  padding: 0.12rem 0.3rem;
+  border-radius: 4px;
+  font-family: var(--mono);
+  font-size: 0.88em;
+}
+
+.note-editor-rich pre code {
+  padding: 0;
+  background: transparent;
+}
+
 .note-code-wrap {
   flex: 1;
   min-height: 0;
