@@ -3,12 +3,14 @@ import {
   Archive,
   Check,
   ChevronDown,
+  Copy,
   Download,
   Eye,
   Folder,
   History,
   Link,
   Lock,
+  Share2,
   Moon,
   NotepadText,
   Pin,
@@ -50,4 +52,6 @@ export const RestoreIcon = (p: IconProps) => <RotateCcw {...p} />
 export const ChevronIcon = (p: IconProps) => <ChevronDown {...p} />
 export const LinkIcon = (p: IconProps) => <Link {...p} />
 export const SettingsIcon = (p: IconProps) => <Settings {...p} />
+export const ShareIcon = (p: IconProps) => <Share2 {...p} />
+export const CopyIcon = (p: IconProps) => <Copy {...p} />
 

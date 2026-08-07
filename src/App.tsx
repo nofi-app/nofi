@@ -1,3 +1,4 @@
+import { Suspense, lazy } from 'react'
 import { AuthProvider } from './lib/auth'
 import { useAuth } from './lib/auth-context'
 import { VaultProvider } from './lib/vault'
@@ -7,7 +8,12 @@ import { AuthScreen } from './components/AuthScreen'
 import { VaultScreen } from './components/VaultScreen'
 import { NotesApp } from './components/NotesApp'
 import { ToastProvider } from './components/Toasts'
+import { parseShareUrl } from './lib/share'
 import './App.css'
+
+const ShareView = lazy(() =>
+  import('./components/ShareView').then((m) => ({ default: m.ShareView })),
+)
 
 function SignedIn() {
   const { status } = useVault()
@@ -31,6 +37,13 @@ function Gate() {
 }
 
 function App() {
+  const share = parseShareUrl()
+  if (share)
+    return (
+      <Suspense fallback={<div className="boot">Loading…</div>}>
+        <ShareView />
+      </Suspense>
+    )
   return (
     <AuthProvider>
       <VaultProvider>

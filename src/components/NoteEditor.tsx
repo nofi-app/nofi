@@ -22,6 +22,7 @@ import {
   LockIcon,
   PinIcon,
   RestoreIcon,
+  ShareIcon,
   SparkIcon,
   TrashIcon,
 } from './icons'
@@ -30,6 +31,7 @@ import { ChecklistEditor } from './editors/ChecklistEditor'
 import { FileAttachments } from './FileAttachments'
 import { RevisionHistory } from './RevisionHistory'
 import { EditorStats } from './EditorStats'
+import { ShareDialog } from './ShareDialog'
 
 const MarkdownEditor = lazy(() =>
   import('./editors/MarkdownEditor').then((m) => ({
@@ -100,6 +102,7 @@ export function NoteEditor({
   const [templateSaved, setTemplateSaved] = useState(false)
   const [showBacklinks, setShowBacklinks] = useState(false)
   const [findOpen, setFindOpen] = useState(false)
+  const [shareOpen, setShareOpen] = useState(false)
 
   const noteRefList = useMemo(
     () => noteRefs(items.filter(isNote)),
@@ -117,6 +120,7 @@ export function NoteEditor({
     setTemplateSaved(false)
     setFindOpen(false)
     setShowBacklinks(false)
+    setShareOpen(false)
   }, [note.id]) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
@@ -369,6 +373,16 @@ export function NoteEditor({
           {!draft.trashed && (
             <button
               type="button"
+              className="toolbar-btn"
+              onClick={() => setShareOpen(true)}
+              title="Share this note"
+            >
+              <ShareIcon size={15} />
+            </button>
+          )}
+          {!draft.trashed && (
+            <button
+              type="button"
               className={`toolbar-btn${showBacklinks ? ' active' : ''}`}
               onClick={() => setShowBacklinks((s) => !s)}
               title={showBacklinks ? 'Hide backlinks' : 'Show backlinks'}
@@ -518,6 +532,10 @@ export function NoteEditor({
             edit({ title, text, editor })
           }}
         />
+      )}
+
+      {shareOpen && (
+        <ShareDialog note={draft} onClose={() => setShareOpen(false)} />
       )}
 
       {draft.locked ? (

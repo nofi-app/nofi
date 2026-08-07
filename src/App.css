@@ -7,6 +7,7 @@
   --bg-muted: #f7f8fa;
   --bg-subtle: #eef0f4;
   --surface: #ffffff;
+  --bg-panel: var(--surface);
   --text: #1b1f27;
   --text-muted: #6b7280;
   --text-faint: #9aa1ac;
@@ -35,6 +36,7 @@
   --bg-muted: #1f2229;
   --bg-subtle: #262a33;
   --surface: #22252d;
+  --bg-panel: var(--surface);
   --text: #e7e9ee;
   --text-muted: #9aa3b2;
   --text-faint: #6b7480;
@@ -2256,4 +2258,200 @@ mark {
   .note-list-pane {
     display: none;
   }
+}
+
+/* Share dialog */
+.modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.modal-head h2 {
+  margin: 0;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 0.3rem;
+  border-radius: 6px;
+  display: inline-flex;
+}
+
+.modal-close:hover {
+  background: var(--bg-hover);
+  color: var(--text);
+}
+
+.share-fresh {
+  background: var(--bg-hover);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.6rem;
+  margin-bottom: 1rem;
+}
+
+.share-link-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-muted);
+}
+
+.share-link-text {
+  flex: 1;
+  font-size: 0.8rem;
+  word-break: break-all;
+  color: var(--text);
+}
+
+.share-copy {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.6rem;
+  font-size: 0.8rem;
+}
+
+.share-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.share-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.4rem 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.84rem;
+}
+
+.share-meta {
+  color: var(--text-muted);
+}
+
+.share-actions {
+  display: inline-flex;
+  gap: 0.35rem;
+}
+
+/* Public share view */
+.share-view {
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.share-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.9rem 1.4rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.share-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 700;
+}
+
+.share-open {
+  font-size: 0.84rem;
+}
+
+.share-main {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 2.5rem 1.4rem 4rem;
+}
+
+.share-loading {
+  color: var(--text-muted);
+}
+
+.share-error {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--text-muted);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.share-error h2 {
+  color: var(--text);
+  margin: 0.5rem 0 0;
+}
+
+.share-error-hint {
+  font-size: 0.84rem;
+}
+
+.share-card {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.8rem 2rem;
+}
+
+.share-title {
+  margin: 0 0 1.2rem;
+  font-size: 1.5rem;
+  line-height: 1.35;
+  word-break: break-word;
+}
+
+.share-pre {
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-family: var(--mono, monospace);
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+.shared-checklist {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.shared-checklist .check-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+  color: var(--text);
+}
+
+.shared-checklist .check-item.done {
+  color: var(--text-muted);
+  text-decoration: line-through;
+}
+
+.check-box-static {
+  width: 18px;
+  height: 18px;
+  flex: none;
+  border: 1.5px solid var(--border-strong, var(--border));
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  color: var(--accent, var(--text-muted));
+  margin-top: 1px;
 }
