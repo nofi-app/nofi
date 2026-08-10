@@ -317,8 +317,7 @@ export function NotesApp() {
   }
 
   function cycleTheme() {
-    const next: Theme =
-      theme === 'system' ? 'light' : theme === 'light' ? 'dark' : 'system'
+    const next: Theme = theme === 'dark' ? 'light' : 'dark'
     setTheme(next)
     setThemeState(next)
   }
