@@ -6,13 +6,15 @@ import { useVault } from './lib/vault-context'
 import { ItemsProvider } from './lib/items-store'
 import { AuthScreen } from './components/AuthScreen'
 import { VaultScreen } from './components/VaultScreen'
-import { NotesApp } from './components/NotesApp'
 import { ToastProvider } from './components/Toasts'
 import { parseShareUrl } from './lib/share'
 import './App.css'
 
 const ShareView = lazy(() =>
   import('./components/ShareView').then((m) => ({ default: m.ShareView })),
+)
+const NotesApp = lazy(() =>
+  import('./components/NotesApp').then((m) => ({ default: m.NotesApp })),
 )
 
 function SignedIn() {
@@ -26,7 +28,11 @@ function SignedIn() {
   ) {
     return <VaultScreen />
   }
-  return <NotesApp />
+  return (
+    <Suspense fallback={<div className="boot">Loading…</div>}>
+      <NotesApp />
+    </Suspense>
+  )
 }
 
 function Gate() {
