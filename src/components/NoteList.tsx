@@ -4,6 +4,14 @@ import { isNote } from '../lib/notes'
 import { useItems } from '../lib/items-context'
 import { PinIcon, TagIcon } from './icons'
 
+const TYPE_LABEL: Record<string, string> = {
+  plain: 'Text',
+  markdown: 'MD',
+  rich: 'Rich',
+  code: 'Code',
+  checklist: 'List',
+}
+
 export type SortMode = 'updated' | 'created' | 'title'
 
 // Estimate for an average note row. The list virtualizes so we never render
@@ -276,6 +284,7 @@ export function NoteList({
                 </span>
               )}
               <span className="note-list-meta">
+                <span className="note-type-badge">{TYPE_LABEL[n.editor] ?? 'Note'}</span>
                 {n.locked && <span>Locked</span>}
                 {n.archived && <span>Archived</span>}
                 {n.trashed && <span>Trash</span>}
