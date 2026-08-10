@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useVault } from '../lib/vault-context'
 import { LockIcon, SparkIcon } from './icons'
+import { PasswordField } from './PasswordField'
 
 export function VaultScreen() {
   const { status, setup, unlock, unlockWithPasscode } = useVault()
@@ -62,43 +63,34 @@ export function VaultScreen() {
 
         <form onSubmit={handleSubmit} className="auth-form">
           {isPasscode ? (
-            <label>
-              Passcode
-              <input
-                type="password"
-                inputMode="numeric"
-                value={passcode}
-                onChange={(e) => setPasscode(e.target.value.replace(/\D/g, ''))}
-                required
-                autoFocus
-                placeholder="••••"
-              />
-            </label>
+            <PasswordField
+              label="Passcode"
+              value={passcode}
+              onChange={(v) => setPasscode(v.replace(/\D/g, ''))}
+              required
+              autoFocus
+              inputMode="numeric"
+              placeholder="••••"
+            />
           ) : (
             <>
-              <label>
-                {isSetup ? 'Passphrase (use a strong, memorable one)' : 'Passphrase'}
-                <input
-                  type="password"
-                  value={passphrase}
-                  onChange={(e) => setPassphrase(e.target.value)}
-                  required
-                  minLength={8}
-                  autoFocus
-                />
-              </label>
+              <PasswordField
+                label={isSetup ? 'Passphrase (use a strong, memorable one)' : 'Passphrase'}
+                value={passphrase}
+                onChange={setPassphrase}
+                required
+                minLength={8}
+                autoFocus
+              />
 
               {isSetup && (
-                <label>
-                  Confirm passphrase
-                  <input
-                    type="password"
-                    value={confirm}
-                    onChange={(e) => setConfirm(e.target.value)}
-                    required
-                    minLength={8}
-                  />
-                </label>
+                <PasswordField
+                  label="Confirm passphrase"
+                  value={confirm}
+                  onChange={setConfirm}
+                  required
+                  minLength={8}
+                />
               )}
 
               {isSetup && (
@@ -107,31 +99,21 @@ export function VaultScreen() {
                     Optional: set a 4–6 digit passcode for quick unlock. If you
                     skip it, you&apos;ll always sign in with your passphrase.
                   </div>
-                  <label>
-                    Quick passcode (optional)
-                    <input
-                      type="password"
-                      inputMode="numeric"
-                      value={passcode}
-                      onChange={(e) =>
-                        setPasscode(e.target.value.replace(/\D/g, ''))
-                      }
-                      placeholder="Leave blank to skip"
-                    />
-                  </label>
+                  <PasswordField
+                    label="Quick passcode (optional)"
+                    value={passcode}
+                    onChange={(v) => setPasscode(v.replace(/\D/g, ''))}
+                    inputMode="numeric"
+                    placeholder="Leave blank to skip"
+                  />
                   {passcode && (
-                    <label>
-                      Confirm passcode
-                      <input
-                        type="password"
-                        inputMode="numeric"
-                        value={passcodeConfirm}
-                        onChange={(e) =>
-                          setPasscodeConfirm(e.target.value.replace(/\D/g, ''))
-                        }
-                        placeholder="Repeat passcode"
-                      />
-                    </label>
+                    <PasswordField
+                      label="Confirm passcode"
+                      value={passcodeConfirm}
+                      onChange={(v) => setPasscodeConfirm(v.replace(/\D/g, ''))}
+                      inputMode="numeric"
+                      placeholder="Repeat passcode"
+                    />
                   )}
                 </>
               )}

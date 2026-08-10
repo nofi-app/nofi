@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useAuth } from '../lib/auth-context'
 import { SparkIcon } from './icons'
+import { PasswordField } from './PasswordField'
 
 type Mode = 'signin' | 'signup'
 
@@ -55,16 +56,13 @@ export function AuthScreen() {
               autoComplete="email"
             />
           </label>
-          <label>
-            Password
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              autoComplete={mode === 'signin' ? 'current-password' : 'new-password'}
-            />
-          </label>
+          <PasswordField
+            label="Password"
+            value={password}
+            onChange={setPassword}
+            required
+            autoComplete={mode === 'signin' ? 'current-password' : 'new-password'}
+          />
 
           {error && <p className="auth-error">{error}</p>}
           {notice && <p className="auth-notice">{notice}</p>}

@@ -6,6 +6,7 @@ import {
   Copy,
   Download,
   Eye,
+  EyeOff,
   Folder,
   History,
   Link,
@@ -42,6 +43,7 @@ export const HistoryIcon = (p: IconProps) => <History {...p} />
 export const DownloadIcon = (p: IconProps) => <Download {...p} />
 export const UploadIcon = (p: IconProps) => <Upload {...p} />
 export const EyeIcon = (p: IconProps) => <Eye {...p} />
+export const EyeOffIcon = (p: IconProps) => <EyeOff {...p} />
 export const XIcon = (p: IconProps) => <X {...p} />
 export const SunIcon = (p: IconProps) => <Sun {...p} />
 export const MoonIcon = (p: IconProps) => <Moon {...p} />
