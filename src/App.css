@@ -1948,6 +1948,119 @@ mark {
   font-size: 0.9rem;
 }
 
+/* ============ Skeletons ============ */
+
+.editor-skeleton {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 1.4rem 1.6rem;
+  gap: 0.9rem;
+  max-width: 880px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.sk-line {
+  height: 0.85rem;
+  border-radius: 6px;
+  background: var(--bg-hover);
+  animation: sk-shimmer 1.4s ease-in-out infinite;
+}
+
+.sk-line.thin {
+  height: 0.6rem;
+}
+
+.sk-line.w-90 {
+  width: 90%;
+}
+
+.sk-line.w-80 {
+  width: 80%;
+}
+
+.sk-line.w-75 {
+  width: 75%;
+}
+
+.sk-line.w-70 {
+  width: 70%;
+}
+
+.sk-line.w-60 {
+  width: 60%;
+}
+
+.sk-line.w-50 {
+  width: 50%;
+}
+
+.sk-line.w-30 {
+  width: 30%;
+}
+
+.sk-title {
+  width: 45%;
+  height: 1.5rem;
+  border-radius: 6px;
+  background: var(--bg-hover);
+  animation: sk-shimmer 1.4s ease-in-out infinite;
+  margin-bottom: 0.4rem;
+}
+
+.sk-toolbar {
+  display: flex;
+  gap: 0.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.sk-chip {
+  width: 2rem;
+  height: 1.5rem;
+  border-radius: 6px;
+  background: var(--bg-hover);
+  animation: sk-shimmer 1.4s ease-in-out infinite;
+}
+
+.sk-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.list-skeleton {
+  padding: 0.25rem 0;
+}
+
+.list-skeleton-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 0.8rem 0.9rem;
+  border-bottom: 1px solid var(--border);
+}
+
+@keyframes sk-shimmer {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sk-line,
+  .sk-title,
+  .sk-chip,
+  .list-skeleton-item .sk-line {
+    animation: none;
+  }
+}
+
 /* Per-note lock overlay */
 .note-lock-overlay {
   position: absolute;

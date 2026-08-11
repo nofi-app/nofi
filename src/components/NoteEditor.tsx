@@ -32,6 +32,7 @@ import { FileAttachments } from './FileAttachments'
 import { RevisionHistory } from './RevisionHistory'
 import { EditorStats } from './EditorStats'
 import { ShareDialog } from './ShareDialog'
+import { EditorSkeleton } from './Skeletons'
 
 const MarkdownEditor = lazy(() =>
   import('./editors/MarkdownEditor').then((m) => ({
@@ -226,7 +227,7 @@ export function NoteEditor({
   function renderEditor() {
     const { editor, text } = draft
     return (
-      <Suspense fallback={<div className="editor-loading">Loading editor…</div>}>
+      <Suspense fallback={<EditorSkeleton />}>
         {(() => {
           switch (editor) {
             case 'markdown':
