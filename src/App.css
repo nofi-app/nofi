@@ -2607,6 +2607,20 @@ mark {
   margin-top: 0.4rem;
 }
 
+.settings-passcode-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  width: 100%;
+  margin: 0.4rem 0;
+}
+
+.settings-passcode-fields > label {
+  max-width: 280px;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
 .note-list-skeleton {
   display: flex;
   flex-direction: column;

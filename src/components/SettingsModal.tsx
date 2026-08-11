@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import type { Item } from '../lib/types'
 import { useAuth } from '../lib/auth-context'
 import { useVault } from '../lib/vault-context'
@@ -7,6 +7,7 @@ import { formatSize } from '../lib/files'
 import type { Theme } from '../lib/theme'
 import { useToasts } from '../lib/toast-context'
 import { useDialog } from '../lib/useDialog'
+import { PasswordField } from './PasswordField'
 import { DownloadIcon, MoonIcon, SunIcon } from './icons'
 
 interface SettingsModalProps {
@@ -23,9 +24,12 @@ export function SettingsModal({
   onClose,
 }: SettingsModalProps) {
   const { user, signOut } = useAuth()
-  const { masterKey } = useVault()
+  const { masterKey, hasPasscode, setPasscode, clearPasscode } = useVault()
   const { push } = useToasts()
   const dialogRef = useDialog(onClose)
+  const [passcodeInput, setPasscodeInput] = useState('')
+  const [passcodeConfirm, setPasscodeConfirm] = useState('')
+  const [passcodeBusy, setPasscodeBusy] = useState(false)
 
   const approxSize = useMemo(
     () => formatSize(JSON.stringify(items).length),
@@ -52,6 +56,34 @@ export function SettingsModal({
         'error',
       )
     }
+  }
+
+  async function doSavePasscode() {
+    if (!/^\d{4,6}$/.test(passcodeInput)) {
+      push('Passcode must be 4 to 6 digits', 'error')
+      return
+    }
+    if (passcodeInput !== passcodeConfirm) {
+      push('Passcodes do not match', 'error')
+      return
+    }
+    setPasscodeBusy(true)
+    const result = await setPasscode(passcodeInput)
+    setPasscodeBusy(false)
+    if (result.error) {
+      push(result.error, 'error')
+      return
+    }
+    setPasscodeInput('')
+    setPasscodeConfirm('')
+    push('Quick passcode saved', 'success')
+  }
+
+  function doClearPasscode() {
+    clearPasscode()
+    setPasscodeInput('')
+    setPasscodeConfirm('')
+    push('Quick passcode removed', 'info')
   }
 
   return (
@@ -101,6 +133,53 @@ export function SettingsModal({
           <div className="settings-row">
             <span className="settings-label">Data size</span>
             <span className="settings-value">{approxSize} (encrypted)</span>
+          </div>
+        </div>
+
+        <div className="settings-section">
+          <div className="settings-head">Security</div>
+          <div className="settings-row">
+            <span className="settings-label">Quick passcode</span>
+            <span className="settings-value">
+              {hasPasscode ? 'Set' : 'Not set'}
+            </span>
+          </div>
+          <div className="settings-passcode-fields">
+            <PasswordField
+              label="New passcode (4–6 digits)"
+              value={passcodeInput}
+              onChange={(v) => setPasscodeInput(v.replace(/\D/g, ''))}
+              inputMode="numeric"
+              placeholder="Leave blank to skip"
+            />
+            {passcodeInput && (
+              <PasswordField
+                label="Confirm passcode"
+                value={passcodeConfirm}
+                onChange={(v) => setPasscodeConfirm(v.replace(/\D/g, ''))}
+                inputMode="numeric"
+                placeholder="Repeat passcode"
+              />
+            )}
+          </div>
+          <div className="settings-actions">
+            <button
+              type="button"
+              className="btn"
+              disabled={passcodeBusy || !/^\d{4,6}$/.test(passcodeInput)}
+              onClick={() => void doSavePasscode()}
+            >
+              {hasPasscode ? 'Change passcode' : 'Set passcode'}
+            </button>
+            {hasPasscode && (
+              <button
+                type="button"
+                className="btn danger"
+                onClick={doClearPasscode}
+              >
+                Remove passcode
+              </button>
+            )}
           </div>
         </div>
 
