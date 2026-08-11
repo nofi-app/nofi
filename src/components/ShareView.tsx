@@ -102,10 +102,10 @@ export function ShareView() {
       <header className="share-header">
         <span className="share-brand">
           <NotesIcon size={18} />
-          Nofi
+          nofi
         </span>
         <a className="btn share-open" href="/">
-          Open Nofi
+          Open nofi
         </a>
       </header>
 

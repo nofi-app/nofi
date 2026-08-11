@@ -1,4 +1,4 @@
--- Nofi schema v2: encrypted file storage
+-- nofi schema v2: encrypted file storage
 -- Private bucket; object paths are UUIDs, bytes are encrypted before upload.
 
 insert into storage.buckets (id, name, public)

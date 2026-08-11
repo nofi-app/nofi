@@ -1,6 +1,6 @@
 # NOFI-PLAN.md — Complete Planning Record
 
-**Purpose:** Permanent reference of every decision made while planning Nofi, a free, open-source, cloud-synced Standard Notes clone with encrypted file attachments. For reference and future migration.
+**Purpose:** Permanent reference of every decision made while planning nofi, a free, open-source, cloud-synced Standard Notes clone with encrypted file attachments. For reference and future migration.
 
 **Status:** Planning complete. Build in progress.
 
@@ -8,7 +8,7 @@
 A free notes app with all Standard Notes features **plus file attachments**, cloud-only, multi-device sync, fully functional, works everywhere, open-source — for one personal user (the owner, a pharmacist, not a coder).
 
 ## 2. Final Naming Decisions
-- **App name:** **Nofi** (NOtes + FIles) — chosen over: nofio, nofy, noty, nota, note, notefy, fote, nofe, and others
+- **App name:** **nofi** (NOtes + FIles) — chosen over: nofio, nofy, noty, nota, note, notefy, fote, nofe, and others
 - **Tagline:** *"Notes. Files. Input. Output."* or *"No fees, all your notes & files"*
 - **GitHub org:** `nofi-app` (created; `nofi`, `nofi-org`, `nofio` were all taken) → `github.com/nofi-app`
 - **Future repo:** `nofi` → `github.com/nofi-app/nofi` (org ≠ repo name, avoids redundancy)
@@ -16,8 +16,8 @@ A free notes app with all Standard Notes features **plus file attachments**, clo
 ## 3. Accounts & Organization
 - **GitHub:** one account `dinesh.io@outlook.com`, handle `dilludx`; ~4-5 repos, all solo
 - **tgpc:** active project. Org `tgpc-org` created; repo moved to `github.com/tgpc-org/tgpc` (old links auto-redirect). Dedicated email `tgpcunofficialforum@gmail.com` attached to GitHub as secondary email
-- **Nofi:** org `nofi-app` reserved; repo to be created under it during build; uses personal email (no dedicated gmail)
-- **Supabase:** one account `dinesh.io@outlook.com`, already hosts TGPC DB/backend. Nofi gets a **new separate project** (isolated from TGPC — separate DB, storage, auth)
+- **nofi:** org `nofi-app` reserved; repo to be created under it during build; uses personal email (no dedicated gmail)
+- **Supabase:** one account `dinesh.io@outlook.com`, already hosts TGPC DB/backend. nofi gets a **new separate project** (isolated from TGPC — separate DB, storage, auth)
 - **Storage per project:** Supabase gives each project its own full quota (500MB DB + 1GB files) — NOT shared across projects
 
 ## 4. Tech Stack (settled)
@@ -25,7 +25,7 @@ A free notes app with all Standard Notes features **plus file attachments**, clo
 - **Backend:** Supabase free tier — auth (email/password), Postgres DB, realtime sync, file storage
 - **Hosting:** Cloudflare Pages (free; user's existing ecosystem)
 - **License:** AGPL-3.0 (same as SN)
-- **TGPC stays on SvelteKit + Cloudflare Pages** — correct tool for its search-data site; React is correct for Nofi (interactive app). No change to TGPC.
+- **TGPC stays on SvelteKit + Cloudflare Pages** — correct tool for its search-data site; React is correct for nofi (interactive app). No change to TGPC.
 
 ## 5. Why Not Use Standard Notes' Actual Code
 - SN = client (open source, free) + sync server (needs MySQL + Redis + ~2GB RAM + Docker → ~$5/mo VPS; cannot run on free hosting)

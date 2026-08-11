@@ -111,7 +111,7 @@ export function parseImport(text: string): ImportedData {
     folders?: FolderItem[]
     files?: ExportFile[]
   }
-  if (data?.app !== 'nofi') throw new Error('Not a Nofi export file')
+  if (data?.app !== 'nofi') throw new Error('Not a nofi export file')
 
   const now = Date.now()
 

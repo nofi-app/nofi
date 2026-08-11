@@ -2,9 +2,9 @@ import { describe, expect, it } from 'vitest'
 import { parseImport } from './export'
 
 describe('parseImport', () => {
-  it('rejects a non-Nofi file', () => {
+  it('rejects a non-nofi file', () => {
     expect(() => parseImport('{"app":"other"}')).toThrow(
-      'Not a Nofi export file',
+      'Not a nofi export file',
     )
   })
 

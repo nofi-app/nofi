@@ -34,7 +34,7 @@ export class ErrorBoundary extends Component<Props, State> {
               <AlertIcon size={22} />
             </span>
             <h1>Something went wrong</h1>
-            <p>Nofi hit an unexpected error. Your notes are safe — they stay encrypted on your device.</p>
+            <p>nofi hit an unexpected error. Your notes are safe — they stay encrypted on your device.</p>
             <div className="crash-actions">
               <button type="button" className="btn btn-primary" onClick={this.handleReload}>
                 Reload

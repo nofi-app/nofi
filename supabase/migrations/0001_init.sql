@@ -1,4 +1,4 @@
--- Nofi schema v1
+-- nofi schema v1
 -- Vault: one row per user, stores crypto metadata only (salt + verifier).
 -- Everything encrypted lives in items as ciphertext; the server can never read it.
 

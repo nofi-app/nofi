@@ -42,7 +42,7 @@ export function AuthScreen() {
         <div className="brand-mark">
           <SparkIcon size={26} />
         </div>
-        <h1 className="auth-title">Nofi</h1>
+        <h1 className="auth-title">nofi</h1>
         <p className="auth-tagline">Notes. Files. Input. Output.</p>
 
         <form onSubmit={handleSubmit} className="auth-form">

@@ -1,4 +1,4 @@
-# Nofi
+# nofi
 
 **Notes. Files. Input. Output.**
 
@@ -66,7 +66,7 @@ npm run build   # production build (outputs to dist/)
 ## Migrating your data
 
 Export all notes as JSON or Markdown from the sidebar (Export buttons) and
-import the JSON on any other Nofi instance. File bytes live in your Supabase
+import the JSON on any other nofi instance. File bytes live in your Supabase
 storage bucket; the JSON export includes their metadata.
 
 ## Security notes

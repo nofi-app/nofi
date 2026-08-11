@@ -25,7 +25,7 @@ function Boot() {
       <div className="boot-mark">
         <SparkIcon size={22} />
       </div>
-      <span className="boot-label">Nofi</span>
+      <span className="boot-label">nofi</span>
     </div>
   )
 }

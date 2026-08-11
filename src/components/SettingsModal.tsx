@@ -108,7 +108,7 @@ export function SettingsModal({
           <div className="settings-head">Emergency kit</div>
           <p className="settings-note">
             Your notes are encrypted before they ever leave your device. Only
-            your vault passphrase can unlock them — not even Nofi can. The full
+            your vault passphrase can unlock them — not even nofi can. The full
             backup includes your text, tags, folders, and image attachments.
           </p>
           <p className="settings-note warn">

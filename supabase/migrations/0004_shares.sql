@@ -1,4 +1,4 @@
--- Nofi schema v4: share-by-link
+-- nofi schema v4: share-by-link
 -- Encrypted payload only; the share key travels in the URL fragment, never stored.
 
 create table if not exists public.shares (

@@ -1,4 +1,4 @@
--- Nofi schema v3: revision history.
+-- nofi schema v3: revision history.
 -- Snapshots of note content, encrypted like items.
 
 create table if not exists public.revisions (

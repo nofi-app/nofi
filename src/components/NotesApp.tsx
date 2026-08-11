@@ -413,7 +413,7 @@ export function NotesApp() {
           <span className="brand-mark-sm">
             <SparkIcon size={14} />
           </span>
-          Nofi
+          nofi
         </span>
         <div className="app-header-right">
           <button
