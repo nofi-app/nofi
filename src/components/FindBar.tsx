@@ -112,6 +112,7 @@ export function FindBar({ value, textareaRef, editor, onMatch, onClose }: FindBa
         className="find-btn"
         onClick={() => go(-1)}
         title="Previous (Shift+Enter)"
+        aria-label="Previous match"
       >
         <ChevronUp size={13} />
       </button>
@@ -120,10 +121,17 @@ export function FindBar({ value, textareaRef, editor, onMatch, onClose }: FindBa
         className="find-btn"
         onClick={() => go(1)}
         title="Next (Enter)"
+        aria-label="Next match"
       >
         <ChevronDown size={13} />
       </button>
-      <button type="button" className="find-btn" onClick={onClose} title="Close (Esc)">
+      <button
+        type="button"
+        className="find-btn"
+        onClick={onClose}
+        title="Close (Esc)"
+        aria-label="Close find"
+      >
         <X size={13} />
       </button>
     </div>

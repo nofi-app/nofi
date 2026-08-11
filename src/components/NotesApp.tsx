@@ -421,6 +421,7 @@ export function NotesApp() {
             className="icon-btn"
             onClick={cycleTheme}
             title={`Theme: ${theme}`}
+            aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} theme`}
           >
             {theme === 'dark' ? <SunIcon size={16} /> : <MoonIcon size={16} />}
           </button>
@@ -429,6 +430,7 @@ export function NotesApp() {
             className="icon-btn"
             onClick={() => setShowSettings(true)}
             title="Settings"
+            aria-label="Settings"
           >
             <SettingsIcon size={16} />
           </button>
@@ -437,6 +439,7 @@ export function NotesApp() {
             className="icon-btn"
             onClick={() => setShowHelp(true)}
             title="Keyboard shortcuts"
+            aria-label="Keyboard shortcuts"
           >
             ?
           </button>
@@ -508,6 +511,7 @@ export function NotesApp() {
               className="sidebar-mini-btn"
               onClick={() => setNewFolderParent(null)}
               title="New folder"
+              aria-label="New folder"
             >
               +
             </button>

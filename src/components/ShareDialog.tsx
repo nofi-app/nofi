@@ -93,7 +93,7 @@ export function ShareDialog({ note, onClose }: ShareDialogProps) {
       >
         <div className="modal-head">
           <h2>Share this note</h2>
-          <button type="button" className="modal-close" onClick={onClose}>
+          <button type="button" className="modal-close" onClick={onClose} aria-label="Close">
             <XIcon size={16} />
           </button>
         </div>
