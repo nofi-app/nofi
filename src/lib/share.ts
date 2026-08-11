@@ -170,14 +170,18 @@ export async function fetchSharePayload(
   const row = Array.isArray(data) ? data[0] : data
   if (!row) throw new Error('This link is invalid or has been revoked.')
 
-  const raw = fromBase64Url(keyB64)
-  const shareKey = await crypto.subtle.importKey(
-    'raw',
-    raw,
-    'AES-GCM',
-    false,
-    ['decrypt'],
-  )
-  const json = await decryptString(shareKey, row.encrypted_payload)
-  return JSON.parse(json) as SharePayload
+  try {
+    const raw = fromBase64Url(keyB64)
+    const shareKey = await crypto.subtle.importKey(
+      'raw',
+      raw,
+      'AES-GCM',
+      false,
+      ['decrypt'],
+    )
+    const json = await decryptString(shareKey, row.encrypted_payload)
+    return JSON.parse(json) as SharePayload
+  } catch {
+    throw new Error('This link is invalid or has been revoked.')
+  }
 }
