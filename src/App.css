@@ -144,9 +144,30 @@ button {
 .boot {
   display: grid;
   place-items: center;
+  align-content: center;
+  gap: 0.9rem;
   height: 100%;
   color: var(--text-muted);
   animation: boot-fade 0.25s ease-out;
+}
+
+.boot-mark {
+  display: grid;
+  place-items: center;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 14px;
+  color: var(--surface);
+  background: linear-gradient(135deg, var(--accent), #7b61ff);
+  box-shadow: 0 6px 20px -6px color-mix(in srgb, var(--accent) 60%, transparent);
+  animation: boot-pulse 1.6s ease-in-out infinite;
+}
+
+.boot-label {
+  font-weight: 700;
+  font-size: 1.05rem;
+  letter-spacing: 0.02em;
+  color: var(--text);
 }
 
 @keyframes boot-fade {
@@ -155,6 +176,76 @@ button {
   }
   to {
     opacity: 1;
+  }
+}
+
+@keyframes boot-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(0.92);
+    opacity: 0.85;
+  }
+}
+
+/* ============ Crash screen ============ */
+
+.crash-screen {
+  display: grid;
+  place-items: center;
+  min-height: 100%;
+  padding: 1.5rem;
+}
+
+.crash-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.5rem;
+  max-width: 360px;
+  padding: 2rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow-pop);
+}
+
+.crash-icon {
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 12px;
+  color: var(--warning-text);
+  background: var(--warning-bg);
+  margin-bottom: 0.4rem;
+}
+
+.crash-card h1 {
+  font-size: 1.15rem;
+  margin: 0;
+  color: var(--text);
+}
+
+.crash-card p {
+  margin: 0 0 0.6rem;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+.crash-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .boot-mark {
+    animation: none;
   }
 }
 
