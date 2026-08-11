@@ -4,6 +4,7 @@ import { createShare, listShares, revokeShare, type ShareRow } from '../lib/shar
 import { useToasts } from '../lib/toast-context'
 import { useVault } from '../lib/vault-context'
 import { useItems } from '../lib/items-context'
+import { useDialog } from '../lib/useDialog'
 import { CopyIcon, LinkIcon, XIcon } from './icons'
 
 interface ShareDialogProps {
@@ -40,13 +41,7 @@ export function ShareDialog({ note, onClose }: ShareDialogProps) {
     void load()
   }, [load])
 
-  useEffect(() => {
-    function onKey(e: KeyboardEvent) {
-      if (e.key === 'Escape') onClose()
-    }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [onClose])
+  const dialogRef = useDialog(onClose)
 
   async function handleCreate() {
     if (!masterKey) return
@@ -88,7 +83,14 @@ export function ShareDialog({ note, onClose }: ShareDialogProps) {
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal settings-modal" onClick={(e) => e.stopPropagation()}>
+      <div
+        className="modal settings-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Share this note"
+        ref={dialogRef}
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="modal-head">
           <h2>Share this note</h2>
           <button type="button" className="modal-close" onClick={onClose}>

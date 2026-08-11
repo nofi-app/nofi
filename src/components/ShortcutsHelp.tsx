@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useDialog } from '../lib/useDialog'
 
 const SHORTCUTS: { keys: string[]; label: string }[] = [
   { keys: ['Cmd/Ctrl', 'N'], label: 'New note' },
@@ -11,17 +11,18 @@ const SHORTCUTS: { keys: string[]; label: string }[] = [
 ]
 
 export function ShortcutsHelp({ onClose }: { onClose: () => void }) {
-  useEffect(() => {
-    function onKey(e: KeyboardEvent) {
-      if (e.key === 'Escape') onClose()
-    }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [onClose])
+  const dialogRef = useDialog(onClose)
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal" onClick={(e) => e.stopPropagation()}>
+      <div
+        className="modal"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Keyboard shortcuts"
+        ref={dialogRef}
+        onClick={(e) => e.stopPropagation()}
+      >
         <h2>Keyboard shortcuts</h2>
         {SHORTCUTS.map((s) => (
           <div key={s.label} className="shortcut-row">

@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useDialog } from '../lib/useDialog'
 import { AlertIcon } from './icons'
 
 interface ConfirmDialogProps {
@@ -16,19 +16,16 @@ export function ConfirmDialog({
   onConfirm,
   onCancel,
 }: ConfirmDialogProps) {
-  useEffect(() => {
-    function onKey(e: KeyboardEvent) {
-      if (e.key === 'Escape') onCancel()
-      if (e.key === 'Enter') onConfirm()
-    }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [onConfirm, onCancel])
+  const dialogRef = useDialog(onCancel)
 
   return (
     <div className="modal-overlay" onClick={onCancel}>
       <div
         className="modal confirm-dialog"
+        role="alertdialog"
+        aria-modal="true"
+        aria-label={title}
+        ref={dialogRef}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="confirm-icon">

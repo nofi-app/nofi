@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react'
+import { useMemo } from 'react'
 import type { Item } from '../lib/types'
 import { useAuth } from '../lib/auth-context'
 import { useVault } from '../lib/vault-context'
@@ -6,6 +6,7 @@ import { exportJson, exportMarkdown } from '../lib/export'
 import { formatSize } from '../lib/files'
 import type { Theme } from '../lib/theme'
 import { useToasts } from '../lib/toast-context'
+import { useDialog } from '../lib/useDialog'
 import { DownloadIcon, MoonIcon, SunIcon } from './icons'
 
 interface SettingsModalProps {
@@ -24,14 +25,7 @@ export function SettingsModal({
   const { user, signOut } = useAuth()
   const { masterKey } = useVault()
   const { push } = useToasts()
-
-  useEffect(() => {
-    function onKey(e: KeyboardEvent) {
-      if (e.key === 'Escape') onClose()
-    }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [onClose])
+  const dialogRef = useDialog(onClose)
 
   const approxSize = useMemo(
     () => formatSize(JSON.stringify(items).length),
@@ -62,7 +56,14 @@ export function SettingsModal({
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal settings-modal" onClick={(e) => e.stopPropagation()}>
+      <div
+        className="modal settings-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Settings"
+        ref={dialogRef}
+        onClick={(e) => e.stopPropagation()}
+      >
         <h2>Settings</h2>
 
         <div className="settings-section">

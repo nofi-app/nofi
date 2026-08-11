@@ -11,7 +11,7 @@
   --bg-panel: var(--surface);
   --text: #1b1f27;
   --text-muted: #6b7280;
-  --text-faint: #9aa1ac;
+  --text-faint: #6e7784;
   --accent: #2f6fed;
   --accent-hover: #255cd4;
   --accent-soft: rgba(47, 111, 237, 0.12);
@@ -45,7 +45,7 @@
   --bg-panel: var(--surface);
   --text: #e7e9ee;
   --text-muted: #9aa3b2;
-  --text-faint: #6b7480;
+  --text-faint: #7d8694;
   --accent: #5b8cff;
   --accent-hover: #79a0ff;
   --accent-soft: rgba(91, 140, 255, 0.16);
