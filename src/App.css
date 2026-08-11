@@ -469,6 +469,22 @@ button {
   font-size: 0.82rem;
 }
 
+.auth-switch {
+  align-self: center;
+  border: none;
+  background: transparent;
+  color: var(--accent);
+  font-size: 0.82rem;
+  cursor: pointer;
+  padding: 0.2rem;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.auth-switch:hover {
+  color: var(--accent-hover);
+}
+
 .auth-notice {
   margin: 0;
   color: var(--notice);

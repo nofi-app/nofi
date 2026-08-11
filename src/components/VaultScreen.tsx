@@ -12,6 +12,7 @@ export function VaultScreen() {
   const [confirm, setConfirm] = useState('')
   const [passcode, setPasscode] = useState('')
   const [passcodeConfirm, setPasscodeConfirm] = useState('')
+  const [usePassphrase, setUsePassphrase] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
 
@@ -36,7 +37,9 @@ export function VaultScreen() {
     const result = isSetup
       ? await setup(passphrase, passcode || undefined)
       : isPasscode
-        ? await unlockWithPasscode(passcode)
+        ? usePassphrase
+          ? await unlock(passphrase)
+          : await unlockWithPasscode(passcode)
         : await unlock(passphrase)
     setBusy(false)
     if (result.error) setError(result.error)
@@ -63,15 +66,44 @@ export function VaultScreen() {
 
         <form onSubmit={handleSubmit} className="auth-form">
           {isPasscode ? (
-            <PasswordField
-              label="Passcode"
-              value={passcode}
-              onChange={(v) => setPasscode(v.replace(/\D/g, ''))}
-              required
-              autoFocus
-              inputMode="numeric"
-              placeholder="••••"
-            />
+            usePassphrase ? (
+              <>
+                <PasswordField
+                  label="Passphrase"
+                  value={passphrase}
+                  onChange={setPassphrase}
+                  required
+                  minLength={8}
+                  autoFocus
+                />
+                <button
+                  type="button"
+                  className="auth-switch"
+                  onClick={() => setUsePassphrase(false)}
+                >
+                  Use quick passcode instead
+                </button>
+              </>
+            ) : (
+              <>
+                <PasswordField
+                  label="Passcode"
+                  value={passcode}
+                  onChange={(v) => setPasscode(v.replace(/\D/g, ''))}
+                  required
+                  autoFocus
+                  inputMode="numeric"
+                  placeholder="••••"
+                />
+                <button
+                  type="button"
+                  className="auth-switch"
+                  onClick={() => setUsePassphrase(true)}
+                >
+                  Forgot passcode? Use your passphrase
+                </button>
+              </>
+            )
           ) : (
             <>
               <PasswordField
