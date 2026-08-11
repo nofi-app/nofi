@@ -202,6 +202,36 @@ export function NoteList({
     }
   }
 
+  const onKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (notes.length === 0) return
+      const idx = notes.findIndex((n) => n.id === selectedId)
+      let next = -1
+      if (e.key === 'ArrowDown') {
+        next = Math.min(idx + 1, notes.length - 1)
+      } else if (e.key === 'ArrowUp') {
+        next = Math.max(idx - 1, 0)
+      } else if (e.key === 'Home') {
+        next = 0
+      } else if (e.key === 'End') {
+        next = notes.length - 1
+      } else {
+        return
+      }
+      e.preventDefault()
+      const target = next >= 0 ? notes[next] : null
+      if (target) {
+        onSelect(target.id)
+        requestAnimationFrame(() => {
+          scrollRef.current
+            ?.querySelector(`[data-note-id="${CSS.escape(target.id)}"]`)
+            ?.scrollIntoView({ block: 'nearest' })
+        })
+      }
+    },
+    [notes, selectedId, onSelect],
+  )
+
   const visible = notes.slice(start, end)
   const padTop = start > 0 ? offsets[start] : 0
   const visibleH = visible.reduce((acc, n) => acc + measuredRow(n.id), 0)
@@ -232,6 +262,9 @@ export function NoteList({
         className="note-list"
         ref={onRef}
         onScroll={onScroll}
+        onKeyDown={onKeyDown}
+        role="listbox"
+        aria-label={title}
       >
         {loading && notes.length === 0 ? (
           <div className="note-list-skeleton" aria-hidden="true">
@@ -255,6 +288,9 @@ export function NoteList({
               key={n.id}
               ref={(el) => recordHeight(n.id, el)}
               type="button"
+              role="option"
+              aria-selected={n.id === selectedId}
+              data-note-id={n.id}
               className={`note-list-item${n.id === selectedId ? ' selected' : ''}`}
               onClick={() => onSelect(n.id)}
             >
