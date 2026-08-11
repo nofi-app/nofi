@@ -16,6 +16,7 @@ import {
 } from '../lib/templates'
 import type { Filter, NoteItem } from '../lib/types'
 import {
+  BackIcon,
   DownloadIcon,
   FolderIcon,
   LockIcon,
@@ -398,6 +399,17 @@ export function NotesApp() {
     <div className="app-shell">
       <header className="app-header">
         <span className="app-brand">
+          {activeNote && (
+            <button
+              type="button"
+              className="icon-btn mobile-back"
+              onClick={() => setSelectedId(null)}
+              title="Back to notes"
+              aria-label="Back to notes"
+            >
+              <BackIcon size={16} />
+            </button>
+          )}
           <span className="brand-mark-sm">
             <SparkIcon size={14} />
           </span>
@@ -442,7 +454,7 @@ export function NotesApp() {
         </div>
       )}
 
-      <div className="app-body">
+      <div className={`app-body${activeNote ? ' has-note' : ''}`}>
         {error && <div className="error-banner">{error}</div>}
         <aside className="sidebar">
           <div className="sidebar-search">

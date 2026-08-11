@@ -3,6 +3,7 @@ import {
   Archive,
   Check,
   ChevronDown,
+  ChevronLeft,
   Copy,
   Download,
   Eye,
@@ -52,6 +53,7 @@ export const CheckIcon = (p: IconProps) => <Check {...p} />
 export const AlertIcon = (p: IconProps) => <AlertCircle {...p} />
 export const RestoreIcon = (p: IconProps) => <RotateCcw {...p} />
 export const ChevronIcon = (p: IconProps) => <ChevronDown {...p} />
+export const BackIcon = (p: IconProps) => <ChevronLeft {...p} />
 export const LinkIcon = (p: IconProps) => <Link {...p} />
 export const SettingsIcon = (p: IconProps) => <Settings {...p} />
 export const ShareIcon = (p: IconProps) => <Share2 {...p} />

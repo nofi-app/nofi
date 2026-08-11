@@ -85,6 +85,48 @@ body {
   text-rendering: optimizeLegibility;
 }
 
+::selection {
+  background: var(--accent-soft);
+  color: var(--text);
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--text-faint);
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
 :focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 1px;
@@ -97,24 +139,6 @@ button {
 :focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 1px;
-}
-
-::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--border-strong);
-  border-radius: 8px;
-  border: 2px solid transparent;
-  background-clip: content-box;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--text-faint);
-  border: 2px solid transparent;
-  background-clip: content-box;
 }
 
 .boot {
@@ -1170,7 +1194,9 @@ mark {
 .note-editor-text {
   flex: 1;
   width: 100%;
-  padding: 1.2rem 1.4rem;
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 1.4rem 1.6rem;
   border: none;
   background: transparent;
   color: var(--text);
@@ -1270,9 +1296,13 @@ mark {
 .note-md-preview {
   flex: 1;
   overflow-y: auto;
-  padding: 1.2rem 1.4rem;
+  padding: 1.4rem 1.6rem;
   line-height: 1.7;
   font-size: 0.95rem;
+}
+
+.note-md-preview > :first-child {
+  margin-top: 0;
 }
 
 .note-md-preview h1,
@@ -1378,13 +1408,15 @@ mark {
 
 .note-editor-rich {
   flex: 1;
-  padding: 1.2rem 1.4rem;
+  padding: 1.4rem 1.6rem;
   overflow-y: auto;
   outline: none;
 }
 
 .note-editor-rich .ProseMirror {
   min-height: 100%;
+  max-width: 880px;
+  margin: 0 auto;
   outline: none;
 }
 
@@ -1686,13 +1718,14 @@ mark {
   flex: 1;
   position: relative;
   overflow-y: auto;
-  padding: 1.2rem 1.4rem;
+  padding: 1.4rem 1.6rem;
 }
 
 .check-list {
   list-style: none;
-  margin: 0;
+  margin: 0 auto;
   padding: 0;
+  max-width: 880px;
 }
 
 .check-item {
@@ -2443,8 +2476,8 @@ mark {
 
 @media (max-width: 720px) {
   .app-body {
-    grid-template-columns: 1fr;
-    grid-template-rows: 1fr;
+    display: block;
+    overflow-y: auto;
   }
 
   .sidebar {
@@ -2452,7 +2485,52 @@ mark {
   }
 
   .note-list-pane {
+    border-right: none;
+  }
+
+  .note-list-pane,
+  .editor-pane {
+    height: 100%;
+  }
+
+  .note-list-pane .note-list {
+    height: 100%;
+  }
+
+  /* Only one pane visible at a time on phones: list when no note selected,
+     editor when a note is open. */
+  .editor-pane {
     display: none;
+  }
+
+  .has-note .editor-pane {
+    display: flex;
+  }
+
+  .has-note .note-list-pane {
+    display: none;
+  }
+
+  .mobile-back {
+    display: none;
+  }
+
+  .has-note .mobile-back {
+    display: inline-flex;
+  }
+
+  .note-list-item {
+    padding: 0.9rem 1rem;
+  }
+
+  .toolbar-btn {
+    min-height: 38px;
+    min-width: 38px;
+    justify-content: center;
+  }
+
+  .note-title-input {
+    min-width: 100px;
   }
 }
 
