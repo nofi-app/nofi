@@ -8,6 +8,13 @@
     <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#17191f" media="(prefers-color-scheme: dark)" />
     <title>Nofi</title>
+    <script>
+      (function () {
+        var theme = localStorage.getItem('nofi:theme')
+        if (theme !== 'light' && theme !== 'dark') theme = 'light'
+        document.documentElement.dataset.theme = theme
+      })()
+    </script>
   </head>
   <body>
     <div id="root"></div>
