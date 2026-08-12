@@ -327,6 +327,12 @@ export function NotesApp() {
     applyTheme(theme)
   }, [theme])
 
+  useEffect(() => {
+    document.title = activeNote
+      ? `${activeNote.title || 'Untitled'} — nofi`
+      : 'nofi'
+  }, [activeNote])
+
   const activeNoteRef = useRef<NoteItem | null>(activeNote)
   activeNoteRef.current = activeNote
 

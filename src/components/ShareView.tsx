@@ -86,6 +86,7 @@ export function ShareView() {
         if (cancelled) return
         setPayload(p)
         setStatus('ready')
+        document.title = `${p.title || 'Untitled note'} — nofi`
       })
       .catch((err: unknown) => {
         if (cancelled) return
