@@ -277,7 +277,13 @@ export function NoteList({
             ))}
           </div>
         ) : notes.length === 0 ? (
-          <div className="note-list-empty">No notes here</div>
+          <div className="note-list-empty">
+            {filter.kind === 'trash'
+              ? 'Trash is empty'
+              : search.trim()
+                ? 'No notes match your search'
+                : 'No notes here yet'}
+          </div>
         ) : (
           <>
             {padTop > 0 && (
