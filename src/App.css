@@ -2561,6 +2561,10 @@ mark {
 
 /* ============ Responsive ============ */
 
+.mobile-new-note {
+  display: none;
+}
+
 @media (max-width: 900px) {
   .app-body {
     grid-template-columns: 180px minmax(180px, 240px) 1fr;
@@ -2576,7 +2580,6 @@ mark {
   .sidebar {
     display: none;
   }
-
   .note-list-pane {
     border-right: none;
   }
@@ -2609,6 +2612,10 @@ mark {
   }
 
   .has-note .mobile-back {
+    display: inline-flex;
+  }
+
+  .mobile-new-note {
     display: inline-flex;
   }
 

@@ -393,6 +393,15 @@ export function NotesApp() {
         <div className="app-header-right">
           <button
             type="button"
+            className="icon-btn mobile-new-note"
+            onClick={newNote}
+            title="New note"
+            aria-label="New note"
+          >
+            <PlusIcon size={16} />
+          </button>
+          <button
+            type="button"
             className="icon-btn"
             onClick={cycleTheme}
             title={`Theme: ${theme}`}
