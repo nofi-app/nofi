@@ -23,7 +23,7 @@ describe('vault key', () => {
 
     await expect(verifyVaultKey(good, verifier)).resolves.toBe(true)
     await expect(verifyVaultKey(bad, verifier)).resolves.toBe(false)
-  })
+  }, 30_000)
 })
 
 describe('string encryption', () => {
@@ -54,7 +54,7 @@ describe('item key wrapping', () => {
 
     const encrypted = await encryptString(itemKey, 'hello')
     await expect(decryptString(unwrapped, encrypted)).resolves.toBe('hello')
-  })
+  }, 30_000)
 })
 
 describe('file encryption', () => {

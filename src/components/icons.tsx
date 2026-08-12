@@ -17,6 +17,7 @@ import {
   NotepadText,
   Pin,
   Plus,
+  Printer,
   RotateCcw,
   Search,
   Settings,
@@ -52,6 +53,7 @@ export const SparkIcon = (p: IconProps) => <Sparkles {...p} />
 export const CheckIcon = (p: IconProps) => <Check {...p} />
 export const AlertIcon = (p: IconProps) => <AlertCircle {...p} />
 export const RestoreIcon = (p: IconProps) => <RotateCcw {...p} />
+export const PrintIcon = (p: IconProps) => <Printer {...p} />
 export const ChevronIcon = (p: IconProps) => <ChevronDown {...p} />
 export const BackIcon = (p: IconProps) => <ChevronLeft {...p} />
 export const LinkIcon = (p: IconProps) => <Link {...p} />

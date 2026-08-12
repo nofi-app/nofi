@@ -2854,3 +2854,90 @@ mark {
   color: var(--accent, var(--text-muted));
   margin-top: 1px;
 }
+
+/* ============ Print ============ */
+
+@media print {
+  html,
+  body,
+  #root {
+    height: auto;
+    background: #fff;
+    color: #000;
+  }
+
+  .app-header,
+  .sidebar,
+  .note-list-pane,
+  .offline-banner,
+  .error-banner,
+  .note-toolbar,
+  .note-toolbar-actions,
+  .note-toolbar .toolbar-btn,
+  .template-saved,
+  .find-bar,
+  .checklist-actions,
+  .file-attachments,
+  .editor-empty,
+  .note-lock-overlay {
+    display: none !important;
+  }
+
+  .app-shell {
+    height: auto !important;
+    display: block !important;
+  }
+
+  .app-body {
+    display: block !important;
+  }
+
+  .editor-pane {
+    display: block !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  .printing .note-editor-text,
+  .printing .note-md-preview,
+  .printing .note-editor-rich .ProseMirror,
+  .printing .checklist,
+  .printing .note-code-wrap,
+  .printing .note-text-wrap {
+    max-width: none;
+    margin: 0;
+    padding: 0;
+    overflow: visible;
+    height: auto;
+    color: #000;
+    background: transparent;
+  }
+
+  .note-title-input {
+    color: #000;
+  }
+
+  .note-md-preview a,
+  .note-editor-rich a {
+    color: #000;
+    text-decoration: underline;
+  }
+
+  .note-md-preview pre,
+  .note-md-preview code,
+  .note-editor-rich pre,
+  .note-editor-rich code {
+    background: #f5f5f5 !important;
+    color: #000 !important;
+  }
+
+  .note-md-preview blockquote {
+    border-left-color: #ccc;
+    color: #333;
+  }
+
+  .note-md-preview img,
+  .note-editor-rich img {
+    max-width: 100%;
+  }
+}

@@ -19,6 +19,7 @@ import {
   HistoryIcon,
   LockIcon,
   PinIcon,
+  PrintIcon,
   RestoreIcon,
   ShareIcon,
   SparkIcon,
@@ -99,6 +100,19 @@ export function NoteEditor({
   const [templateSaved, setTemplateSaved] = useState(false)
   const [findOpen, setFindOpen] = useState(false)
   const [shareOpen, setShareOpen] = useState(false)
+
+  function handlePrint() {
+    const shell = document.querySelector('.app-shell')
+    if (shell) shell.classList.add('printing')
+    window.print()
+    window.addEventListener(
+      'afterprint',
+      () => {
+        shell?.classList.remove('printing')
+      },
+      { once: true },
+    )
+  }
 
   useEffect(() => {
     setDraft(note)
@@ -349,6 +363,17 @@ export function NoteEditor({
               title="Save as template"
             >
               <SparkIcon size={15} />
+            </button>
+          )}
+          {!draft.trashed && (
+            <button
+              type="button"
+              className="toolbar-btn"
+              onClick={handlePrint}
+              title="Print note"
+              aria-label="Print note"
+            >
+              <PrintIcon size={15} />
             </button>
           )}
           {!draft.trashed && (
