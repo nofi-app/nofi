@@ -139,33 +139,7 @@ export function NotesApp() {
     saveUserTemplate(note)
   }
 
-  async function rewriteBacklinks(oldTitle: string, newTitle: string) {
-    const oldRef = `[[${oldTitle}]]`
-    const newRef = `[[${newTitle}]]`
-    if (oldRef === newRef) return
-    const targets = items.filter(
-      (i): i is NoteItem => isNote(i) && i.text.includes(oldRef),
-    )
-    if (!targets.length) return
-    for (const n of targets) {
-      await updateItem({
-        ...n,
-        text: n.text.split(oldRef).join(newRef),
-        updatedAt: Date.now(),
-      })
-    }
-    push(
-      targets.length === 1
-        ? `Updated 1 note that linked to this one`
-        : `Updated ${targets.length} notes that linked to this one`,
-      'success',
-    )
-  }
-
   async function handleUpdate(note: NoteItem): Promise<void> {
-    const prev = items.find(
-      (i): i is NoteItem => isNote(i) && i.id === note.id,
-    )
     if (masterKey) {
       const last = lastRevisionAt.current.get(note.id) ?? 0
       if (Date.now() - last > 5 * 60 * 1000) {
@@ -176,11 +150,6 @@ export function NotesApp() {
       }
     }
     await updateItem(note)
-    if (prev && prev.title !== note.title && note.title.trim()) {
-      void rewriteBacklinks(prev.title.trim(), note.title.trim()).catch((err) =>
-        console.warn('Backlink rewrite failed:', err),
-      )
-    }
   }
 
   function handleTrash(id: string) {
@@ -661,7 +630,6 @@ export function NotesApp() {
               onDeleteForever={deleteForever}
               onAddTag={addTag}
               onSaveTemplate={saveTemplateFrom}
-              onOpenNote={setSelectedId}
             />
           ) : (
             <div className="editor-empty">

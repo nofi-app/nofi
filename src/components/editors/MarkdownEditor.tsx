@@ -19,13 +19,6 @@ import {
   Strikethrough,
 } from 'lucide-react'
 import { fileRefUrl } from '../../lib/inline-images'
-import {
-  detectLinkSuggest,
-  filterSuggestions,
-  NOTE_LINK_RE,
-  type NoteLinkSuggest,
-} from '../../lib/note-links'
-import { NoteLinkPopup } from '../NoteLinkPopup'
 import { FindBar } from '../FindBar'
 
 interface MarkdownEditorProps {
@@ -33,9 +26,6 @@ interface MarkdownEditorProps {
   onChange: (value: string) => void
   insertImage?: (file: File) => Promise<string | null>
   resolveImages?: (container: HTMLElement | null) => void
-  notes?: { id: string; title: string }[]
-  excludeId?: string
-  onOpenNote?: (id: string) => void
   findOpen?: boolean
   onFindClose?: () => void
 }
@@ -47,9 +37,6 @@ export function MarkdownEditor({
   onChange,
   insertImage,
   resolveImages,
-  notes,
-  excludeId,
-  onOpenNote,
   findOpen,
   onFindClose,
 }: MarkdownEditorProps) {
@@ -57,44 +44,16 @@ export function MarkdownEditor({
   const ref = useRef<HTMLTextAreaElement>(null)
   const rootRef = useRef<HTMLDivElement>(null)
   const imgInput = useRef<HTMLInputElement>(null)
-  const [suggest, setSuggest] = useState<NoteLinkSuggest>({
-    open: false,
-    query: '',
-  })
-  const [suggestIndex, setSuggestIndex] = useState(0)
-
-  const displayValue = useMemo(
-    () =>
-      value.replace(
-        NOTE_LINK_RE,
-        (_m, title: string) => `[${title}](#note-link)`,
-      ),
-    [value],
-  )
 
   const html = useMemo(() => {
-    const rendered = marked.parse(displayValue, { gfm: true, breaks: true }) as string
+    const rendered = marked.parse(value, { gfm: true, breaks: true }) as string
     return DOMPurify.sanitize(rendered)
-  }, [displayValue])
-
-  const options = useMemo(
-    () => filterSuggestions(notes ?? [], suggest.query, excludeId ?? ''),
-    [notes, suggest.query, excludeId],
-  )
+  }, [value])
 
   useEffect(() => {
     const container = document.querySelector('.note-md-preview')
     if (!container) return
     const toggle = (e: Event) => {
-      const link = (e.target as HTMLElement).closest('a[href="#note-link"]')
-      if (link) {
-        if (onOpenNote && notes) {
-          const title = link.textContent ?? ''
-          const match = notes.find((r) => r.title === title)
-          if (match) onOpenNote(match.id)
-        }
-        return
-      }
       const box = (e.target as HTMLElement).closest('input[type="checkbox"]')
       if (!box) return
       const line = (box as HTMLElement).closest('li')
@@ -114,7 +73,7 @@ export function MarkdownEditor({
     }
     container.addEventListener('click', toggle)
     return () => container.removeEventListener('click', toggle)
-  }, [value, onChange, onOpenNote, notes])
+  }, [value, onChange])
 
   useEffect(() => {
     if (!resolveImages) return
@@ -194,55 +153,6 @@ export function MarkdownEditor({
 
   function pickImage() {
     imgInput.current?.click()
-  }
-
-  function updateSuggest() {
-    const el = ref.current
-    if (!el) return
-    const pos = el.selectionStart
-    const det = detectLinkSuggest(value.slice(0, pos), value.slice(pos))
-    if (det.open) {
-      setSuggest({ open: true, query: det.query })
-      setSuggestIndex(0)
-    } else {
-      setSuggest((s) => (s.open ? { open: false, query: '' } : s))
-    }
-  }
-
-  function pickSuggestion(opt: { id: string; title: string }) {
-    const el = ref.current
-    if (!el) return
-    const pos = el.selectionStart
-    const before = value.slice(0, pos)
-    const start = before.lastIndexOf('[[')
-    if (start === -1) return
-    const next =
-      value.slice(0, start) + `[[${opt.title}]]` + value.slice(pos)
-    onChange(next)
-    setSuggest({ open: false, query: '' })
-    requestAnimationFrame(() => {
-      el.focus()
-      const caret = start + opt.title.length + 4
-      el.setSelectionRange(caret, caret)
-    })
-  }
-
-  function onKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
-    if (!suggest.open) return
-    if (e.key === 'ArrowDown') {
-      e.preventDefault()
-      setSuggestIndex((i) => Math.min(i + 1, options.length - 1))
-    } else if (e.key === 'ArrowUp') {
-      e.preventDefault()
-      setSuggestIndex((i) => Math.max(i - 1, 0))
-    } else if (e.key === 'Enter' || e.key === 'Tab') {
-      e.preventDefault()
-      const opt = options[suggestIndex]
-      if (opt) pickSuggestion(opt)
-    } else if (e.key === 'Escape') {
-      e.preventDefault()
-      setSuggest({ open: false, query: '' })
-    }
   }
 
   function renderToolbar() {
@@ -333,8 +243,6 @@ export function MarkdownEditor({
     value,
     onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) =>
       onChange(e.target.value),
-    onKeyUp: updateSuggest,
-    onKeyDown,
     onDrop: onTransfer,
     onPaste: onTransfer,
     placeholder: 'Write in Markdown…',
@@ -354,13 +262,6 @@ export function MarkdownEditor({
           if (f) void insertImageAtCursor(f)
           e.target.value = ''
         }}
-      />
-      <NoteLinkPopup
-        open={suggest.open}
-        options={options}
-        index={suggestIndex}
-        onPick={pickSuggestion}
-        style={{ top: '48px' }}
       />
       {findOpen && onFindClose && (
         <FindBar value={value} textareaRef={ref} onClose={onFindClose} />
